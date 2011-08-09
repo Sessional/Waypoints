@@ -1,0 +1,6 @@
+8/9/2011:
+	fixed sorting
+	check to see if files exist when saving - if not create them and the directory for them
+8/8/2011:
+	added a return mechanism
+	truncate xyz coordinates for less clutter

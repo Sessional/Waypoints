@@ -1,0 +1,9 @@
+## YAML Template.
+---
+name: "Waypoints"
+main: waypoints.Waypoints
+version: "0.1"
+commands:
+    waypoints:
+      description: manage waypoints
+      usage: /waypoints <command> <args>

@@ -4,6 +4,38 @@ name: "Waypoints"
 main: waypoints.Waypoints
 version: "0.1"
 commands:
-    waypoints:
-      description: manage waypoints
-      usage: /waypoints <command> <args>
+     waypoints:
+        description: manage waypoints
+        usage: /<command> help
+     waypoints go:
+        description: go to a waypoint
+        usage: /<command> go name
+        permissions: waypoint.basic.go
+     waypoints add:
+        description: create a waypoint
+        usage: /<command> add name [x] [y] [z]
+        permissions: waypoint.admin.create
+     waypoints create:
+        description: create a waypoint
+        usage: /<command> create name [x] [y] [z]
+        permissions: waypoint.admin.create
+     waypoints delete:
+        description: delete a waypoint
+        usage: /<command> delete name
+        permissions: waypoint.admin.delete
+     waypoints return:
+        description: return to the place you were before waypointing
+        usage: /<command> return
+        permissions: waypoint.basic.return
+     waypoints list:
+        description: list waypoints
+        usage: /<command> list
+        permissions: waypoint.basic.list
+     waypoints help:
+        description: list waypoint commands
+        usage: /<command> help
+        permissions: waypoint.basic.help
+     waypoints save:
+        description: save waypoints
+        usage: /<command> save
+        permissions: waypoint.admin.save

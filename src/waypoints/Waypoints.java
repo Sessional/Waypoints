@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Location;
 import org.bukkit.command.*;
@@ -12,6 +11,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event.*;
 import org.bukkit.plugin.*;
 import org.bukkit.plugin.java.*;
+
+import com.nijiko.permissions.PermissionHandler;
+import com.nijikokun.bukkit.Permissions.Permissions;
 
 import java.beans.XMLEncoder;
 import java.beans.XMLDecoder;
@@ -35,25 +37,47 @@ public class Waypoints extends JavaPlugin
     List<Waypoint> waypointList = new ArrayList<Waypoint>();
     Map<Player, Location> lastLocation = new HashMap<Player, Location>();
 
+    public static PermissionHandler permissionHandler;
+
     public void onEnable()
     {
         pm = this.getServer().getPluginManager();
-        loadWaypoints();
+        loadWaypoints(null);
+        setupPermissions();
         log.info("Waypoints has loaded.");
+    }
+
+    public void setupPermissions()
+    {
+        if(permissionHandler != null)
+        {
+            return;
+        }
+
+        Plugin permissionsPlugin = this.getServer().getPluginManager().getPlugin("Permissions");
+
+        if (permissionsPlugin == null)
+        {
+            log.info("Permission system not detected, defaulting to OP");
+            return;
+        }
+
+        permissionHandler = ((Permissions) permissionsPlugin).getHandler();
+        log.info("Found and will use plugin " + ((Permissions)permissionsPlugin).getDescription().getFullName());
     }
 
     public void onDisable()
     {
         pm = null;
 
-        saveWaypoints();
+        saveWaypoints(null);
         log.info("World's Waypoints has unloaded.");
         log = null;
     }
 
     public void onSave()
     {
-        saveWaypoints();
+        saveWaypoints(null);
     }
 
     public boolean doesWaypointExist(String name)
@@ -149,7 +173,7 @@ public class Waypoints extends JavaPlugin
         }
         return false;
     }
-    
+
     public boolean listWaypoints(Player committingPlayer, String[] args)
     {
         ArrayList<Waypoint> dummyList = new ArrayList<Waypoint>();
@@ -163,7 +187,7 @@ public class Waypoints extends JavaPlugin
 
         for (int i = 0; i < sortedList.size(); i++)
         {
-            committingPlayer.sendMessage("" + sortedList.get(i).name + " [x,y,z] ["
+            committingPlayer.sendMessage("§e" + sortedList.get(i).name + "§f [x,y,z] ["
                     + (int) sortedList.get(i).location.getX() + "," + (int) sortedList.get(i).location.getY() + "," + (int) sortedList.get(i).location.getZ() + "]");
 
         }
@@ -223,7 +247,6 @@ public class Waypoints extends JavaPlugin
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args)
     {
-
         try
         {
             if (cmd.getName().equalsIgnoreCase("waypoints"))
@@ -231,27 +254,67 @@ public class Waypoints extends JavaPlugin
                 Player committingPlayer = (Player) sender;
                 if (args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("add"))
                 {
+                    if (!permissionHandler.has(committingPlayer, "waypoints.admin.create"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
                     return createWaypoint(committingPlayer, args);
                 } else if (args[0].equalsIgnoreCase("go"))
                 {
+                    if (!permissionHandler.has(committingPlayer, "waypoints.basic.go"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
                     return goWaypoint(committingPlayer, args);
                 } else if (args[0].equalsIgnoreCase("delete"))
                 {
+                    if (!permissionHandler.has(committingPlayer, "waypoints.admin.delete"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
                     return deleteWaypoint(args);
                 } else if (args[0].equalsIgnoreCase("save"))
                 {
-                    return saveWaypoints();
+                    if (!permissionHandler.has(committingPlayer, "waypoints.admin.save"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
+                    return saveWaypoints(committingPlayer);
                 } else if (args[0].equalsIgnoreCase("load"))
                 {
-                    return loadWaypoints();
+                    if (!permissionHandler.has(committingPlayer, "waypoints.admin.save"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
+                    return loadWaypoints(committingPlayer);
                 } else if (args[0].equalsIgnoreCase("list"))
                 {
+                    if (!permissionHandler.has(committingPlayer, "waypoints.basic.list"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
                     return listWaypoints(committingPlayer, args);
                 } else if (args[0].equalsIgnoreCase("help"))
                 {
+                    if (!permissionHandler.has(committingPlayer, "waypoints.basic.help"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
                     return printHelp(committingPlayer, args);
                 } else if (args[0].equalsIgnoreCase("return"))
                 {
+                    if (!permissionHandler.has(committingPlayer, "waypoints.basic.return"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
                     return returnToPoint(committingPlayer, args);
                 }
             }
@@ -264,7 +327,7 @@ public class Waypoints extends JavaPlugin
     /*
      * TODO: Get system file sparators! (Does this need doing?)
      */
-    public boolean loadWaypoints()
+    public boolean loadWaypoints(Player committingPlayer)
     {
         String waypointsNamePath = "./plugins/Waypoints/names.xml";
         String worldsPath = "./plugins/Waypoints/worlds.xml";
@@ -322,6 +385,9 @@ public class Waypoints extends JavaPlugin
                     waypointList.add(new Waypoint(waypoints[i], new Location(getServer().getWorld(worlds[i]), xCoords[i], yCoords[i], zCoords[i])));
                 }
             }
+
+            if (committingPlayer != null)
+                committingPlayer.sendMessage("Waypoints have been loaded.");
             return true;
         } catch (FileNotFoundException ex)
         {
@@ -331,7 +397,7 @@ public class Waypoints extends JavaPlugin
         return false;
     }
 
-    public boolean saveWaypoints()
+    public boolean saveWaypoints(Player committingPlayer)
     {
         String[] waypoints = new String[waypointList.size()];
         String[] worlds = new String[waypointList.size()];
@@ -364,7 +430,8 @@ public class Waypoints extends JavaPlugin
         {
             if (!pluginFile.exists())
             {
-                try {
+                try
+                {
                     pluginFile.mkdir();
                 } catch (Exception e)
                 {
@@ -447,6 +514,8 @@ public class Waypoints extends JavaPlugin
             zWriter.flush();
             zWriter.close();
 
+            if (committingPlayer != null)
+                committingPlayer.sendMessage("Waypoints have been saved.");
             return true;
         } catch (FileNotFoundException ex)
         {

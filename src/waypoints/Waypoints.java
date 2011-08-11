@@ -37,25 +37,37 @@ public class Waypoints extends JavaPlugin
     /**
      * Configuration fields
      */
-    public boolean usingPermissionsBukkit;
-    public boolean usingPermissions;
     Logger log = Logger.getLogger("Minecraft");
     PluginManager pm;
-    List<Waypoint> waypointList = new ArrayList<Waypoint>();
-    Map<Player, Location> lastLocation = new HashMap<Player, Location>();
+    public List<Waypoint> waypointList = new ArrayList<Waypoint>();
+    public Map<Player, Location> lastLocation = new HashMap<Player, Location>();
     public static PermissionHandler permissionHandler;
     public Configurations configs;
+    public PermissionBase commandHandler;
 
     public void onEnable()
     {
+        log.info("Waypoints is loading.");
         pm = this.getServer().getPluginManager();
         loadWaypoints(null);
         if (!loadConfigurations())
         {
             configs = new Configurations();
+            commandHandler = new PermissionsDefault(this);
             System.out.println("Creating new configurations.");
+        } else
+        {
+            if (configs.permissionsMod)
+            {
+                setupPermissions();
+            } else if (configs.permissionsBukkit)
+            {
+                commandHandler = new PermissionsBukkitHandler(this);
+            } else
+            {
+                commandHandler = new PermissionsDefault(this);
+            }
         }
-        setupPermissions();
         log.info("Waypoints has loaded.");
     }
 
@@ -78,6 +90,7 @@ public class Waypoints extends JavaPlugin
         configs.permissionsMod = true;
 
         permissionHandler = ((Permissions) permissionsPlugin).getHandler();
+        commandHandler = new PermissionsHandler(this, permissionHandler);
         log.info("Found and will use plugin " + ((Permissions) permissionsPlugin).getDescription().getFullName() + " for permissions.");
     }
 
@@ -96,170 +109,6 @@ public class Waypoints extends JavaPlugin
         saveConfigurations();
     }
 
-    public boolean doesWaypointExist(String name)
-    {
-        for (Waypoint point : waypointList)
-        {
-            if (point.name.equalsIgnoreCase(name))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public Waypoint getWaypoint(String name)
-    {
-        for (int i = 0; i < waypointList.size(); i++)
-        {
-            if (waypointList.get(i).name.equalsIgnoreCase(name))
-            {
-                return waypointList.get(i);
-            }
-        }
-        return null;
-    }
-
-    public int getWaypointIndex(String name)
-    {
-        for (int i = 0; i < waypointList.size(); i++)
-        {
-            if (waypointList.get(i).name.equalsIgnoreCase(name))
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    public boolean createWaypoint(Player committingPlayer, String[] args)
-    {
-        String name = args[1];
-        Location loc;
-        if (args.length > 2)
-        {
-            int xCoord = Integer.parseInt(args[2]);
-            int yCoord = Integer.parseInt(args[3]);
-            int zCoord = Integer.parseInt(args[4]);
-            loc = new Location(committingPlayer.getWorld(), xCoord, yCoord, zCoord);
-        } else
-        {
-            loc = committingPlayer.getLocation();
-        }
-        if (!doesWaypointExist(name))
-        {
-            waypointList.add(new Waypoint(name, loc));
-            committingPlayer.sendMessage("Waypoint " + name + " created at " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + ".");
-            return true;
-        } else
-        {
-            committingPlayer.sendMessage("Waypoint with that name already exists.");
-        }
-        return false;
-    }
-
-    public boolean deleteWaypoint(String[] args)
-    {
-        String name = args[1];
-        if (doesWaypointExist(name))
-        {
-            int index = getWaypointIndex(name);
-            if (index != -1)
-            {
-                waypointList.remove(index);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean goWaypoint(Player committingPlayer, String[] args)
-    {
-        String name = args[1];
-        if (doesWaypointExist(name))
-        {
-            if (lastLocation.containsKey(committingPlayer))
-            {
-                lastLocation.remove(committingPlayer);
-            }
-            lastLocation.put(committingPlayer, committingPlayer.getLocation());
-            committingPlayer.teleport(getWaypoint(name).location);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean listWaypoints(Player committingPlayer, String[] args)
-    {
-        ArrayList<Waypoint> dummyList = new ArrayList<Waypoint>();
-        for (int i = 0; i < waypointList.size(); i++)
-        {
-            dummyList.add(waypointList.get(i));
-        }
-
-        ArrayList<Waypoint> sortedList = new ArrayList<Waypoint>();
-        sort(sortedList);
-
-        for (int i = 0; i < sortedList.size(); i++)
-        {
-            committingPlayer.sendMessage("§e" + sortedList.get(i).name + "§f [x,y,z] ["
-                    + (int) sortedList.get(i).location.getX() + "," + (int) sortedList.get(i).location.getY() + "," + (int) sortedList.get(i).location.getZ() + "]");
-
-        }
-        return true;
-    }
-
-    public void sort(ArrayList<Waypoint> finalList)
-    {
-        ArrayList<Waypoint> dummyList = new ArrayList<Waypoint>();
-        for (int i = 0; i < waypointList.size(); i++)
-        {
-            dummyList.add(waypointList.get(i));
-        }
-
-        int smallestIndex = Integer.MAX_VALUE;
-
-        for (int i = 0; i < dummyList.size(); i++)
-        {
-            if (smallestIndex == Integer.MAX_VALUE || dummyList.get(i).name.compareTo(dummyList.get(smallestIndex).name) < 0)
-            {
-                smallestIndex = i;
-            }
-            if (i == (dummyList.size() - 1))
-            {
-                finalList.add(dummyList.get(smallestIndex));
-                dummyList.remove(smallestIndex);
-                i = -1;
-                smallestIndex = Integer.MAX_VALUE;
-            }
-        }
-    }
-
-    public boolean printHelp(Player committingPlayer, String[] args)
-    {
-        committingPlayer.sendMessage("/waypoints create(add) <name> [x] [y] [z]");
-        committingPlayer.sendMessage("/waypoints go <name>");
-        committingPlayer.sendMessage("/waypoints delete <name>");
-        committingPlayer.sendMessage("/waypoints list");
-        committingPlayer.sendMessage("/waypoints save");
-        committingPlayer.sendMessage("/waypoints load");
-        committingPlayer.sendMessage("/waypoints return");
-        return true;
-    }
-
-    public boolean returnToPoint(Player committingPlayer, String[] args)
-    {
-        if (lastLocation.containsKey(committingPlayer))
-        {
-            Location loc = lastLocation.get(committingPlayer);
-            committingPlayer.teleport(loc);
-            lastLocation.remove(committingPlayer);
-            return true;
-        }
-        return false;
-    }
-
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args)
     {
@@ -268,113 +117,7 @@ public class Waypoints extends JavaPlugin
             if (cmd.getName().equalsIgnoreCase("waypoints"))
             {
                 Player committingPlayer = (Player) sender;
-                if (args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("add"))
-                {
-                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.admin.create"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.admin.create"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    return createWaypoint(committingPlayer, args);
-                } else if (args[0].equalsIgnoreCase("go"))
-                {
-                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.basic.go"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.basic.go"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    return goWaypoint(committingPlayer, args);
-                } else if (args[0].equalsIgnoreCase("delete"))
-                {
-                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.admin.delete"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.admin.delete"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    return deleteWaypoint(args);
-                } else if (args[0].equalsIgnoreCase("save"))
-                {
-                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.admin.save"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.admin.save"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    System.out.println("Using permissions: " + configs.getPermissionsMod());
-                    saveConfigurations();
-                    return saveWaypoints(committingPlayer);
-                } else if (args[0].equalsIgnoreCase("load"))
-                {
-                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.admin.save"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.admin.save"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    return loadWaypoints(committingPlayer);
-                } else if (args[0].equalsIgnoreCase("list"))
-                {
-                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.basic.list"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.basic.list"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    return listWaypoints(committingPlayer, args);
-                } else if (args[0].equalsIgnoreCase("help"))
-                {
-                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.basic.help"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.basic.help"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    return printHelp(committingPlayer, args);
-                } else if (args[0].equalsIgnoreCase("return"))
-                {
-                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.basic.return"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.basic.return"))
-                    {
-                        committingPlayer.sendMessage("You do not have permissions to do that.");
-                        return true;
-                    }
-                    return returnToPoint(committingPlayer, args);
-                }
+                return commandHandler.handleCommand(committingPlayer, args);
             }
         } catch (Exception e)
         {

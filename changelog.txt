@@ -1,4 +1,8 @@
+8/10/2011:
+	Implemented config file to disable permissions
+	TODO: implement PermissionsBukkit permissions
 8/9/2011:
+	added colors to list output
 	fixed sorting
 	check to see if files exist when saving - if not create them and the directory for them
 8/8/2011:

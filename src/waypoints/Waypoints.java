@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Location;
 import org.bukkit.command.*;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  *
@@ -32,24 +34,34 @@ import java.util.Map;
 public class Waypoints extends JavaPlugin
 {
 
+    /**
+     * Configuration fields
+     */
+    public boolean usingPermissionsBukkit;
+    public boolean usingPermissions;
     Logger log = Logger.getLogger("Minecraft");
     PluginManager pm;
     List<Waypoint> waypointList = new ArrayList<Waypoint>();
     Map<Player, Location> lastLocation = new HashMap<Player, Location>();
-
     public static PermissionHandler permissionHandler;
+    public Configurations configs;
 
     public void onEnable()
     {
         pm = this.getServer().getPluginManager();
         loadWaypoints(null);
+        if (!loadConfigurations())
+        {
+            configs = new Configurations();
+            System.out.println("Creating new configurations.");
+        }
         setupPermissions();
         log.info("Waypoints has loaded.");
     }
 
     public void setupPermissions()
     {
-        if(permissionHandler != null)
+        if (permissionHandler != null)
         {
             return;
         }
@@ -58,12 +70,15 @@ public class Waypoints extends JavaPlugin
 
         if (permissionsPlugin == null)
         {
-            log.info("Permission system not detected, defaulting to OP");
+            configs.permissionsMod = false;
+            log.info("Did not find permissions plugin, ignoring them.");
             return;
         }
 
+        configs.permissionsMod = true;
+
         permissionHandler = ((Permissions) permissionsPlugin).getHandler();
-        log.info("Found and will use plugin " + ((Permissions)permissionsPlugin).getDescription().getFullName());
+        log.info("Found and will use plugin " + ((Permissions) permissionsPlugin).getDescription().getFullName() + " for permissions.");
     }
 
     public void onDisable()
@@ -78,6 +93,7 @@ public class Waypoints extends JavaPlugin
     public void onSave()
     {
         saveWaypoints(null);
+        saveConfigurations();
     }
 
     public boolean doesWaypointExist(String name)
@@ -254,7 +270,12 @@ public class Waypoints extends JavaPlugin
                 Player committingPlayer = (Player) sender;
                 if (args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("add"))
                 {
-                    if (!permissionHandler.has(committingPlayer, "waypoints.admin.create"))
+                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.admin.create"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
+                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.admin.create"))
                     {
                         committingPlayer.sendMessage("You do not have permissions to do that.");
                         return true;
@@ -262,7 +283,12 @@ public class Waypoints extends JavaPlugin
                     return createWaypoint(committingPlayer, args);
                 } else if (args[0].equalsIgnoreCase("go"))
                 {
-                    if (!permissionHandler.has(committingPlayer, "waypoints.basic.go"))
+                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.basic.go"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
+                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.basic.go"))
                     {
                         committingPlayer.sendMessage("You do not have permissions to do that.");
                         return true;
@@ -270,7 +296,12 @@ public class Waypoints extends JavaPlugin
                     return goWaypoint(committingPlayer, args);
                 } else if (args[0].equalsIgnoreCase("delete"))
                 {
-                    if (!permissionHandler.has(committingPlayer, "waypoints.admin.delete"))
+                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.admin.delete"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
+                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.admin.delete"))
                     {
                         committingPlayer.sendMessage("You do not have permissions to do that.");
                         return true;
@@ -278,15 +309,27 @@ public class Waypoints extends JavaPlugin
                     return deleteWaypoint(args);
                 } else if (args[0].equalsIgnoreCase("save"))
                 {
-                    if (!permissionHandler.has(committingPlayer, "waypoints.admin.save"))
+                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.admin.save"))
                     {
                         committingPlayer.sendMessage("You do not have permissions to do that.");
                         return true;
                     }
+                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.admin.save"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
+                    System.out.println("Using permissions: " + configs.getPermissionsMod());
+                    saveConfigurations();
                     return saveWaypoints(committingPlayer);
                 } else if (args[0].equalsIgnoreCase("load"))
                 {
-                    if (!permissionHandler.has(committingPlayer, "waypoints.admin.save"))
+                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.admin.save"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
+                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.admin.save"))
                     {
                         committingPlayer.sendMessage("You do not have permissions to do that.");
                         return true;
@@ -294,7 +337,12 @@ public class Waypoints extends JavaPlugin
                     return loadWaypoints(committingPlayer);
                 } else if (args[0].equalsIgnoreCase("list"))
                 {
-                    if (!permissionHandler.has(committingPlayer, "waypoints.basic.list"))
+                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.basic.list"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
+                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.basic.list"))
                     {
                         committingPlayer.sendMessage("You do not have permissions to do that.");
                         return true;
@@ -302,7 +350,12 @@ public class Waypoints extends JavaPlugin
                     return listWaypoints(committingPlayer, args);
                 } else if (args[0].equalsIgnoreCase("help"))
                 {
-                    if (!permissionHandler.has(committingPlayer, "waypoints.basic.help"))
+                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.basic.help"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
+                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.basic.help"))
                     {
                         committingPlayer.sendMessage("You do not have permissions to do that.");
                         return true;
@@ -310,7 +363,12 @@ public class Waypoints extends JavaPlugin
                     return printHelp(committingPlayer, args);
                 } else if (args[0].equalsIgnoreCase("return"))
                 {
-                    if (!permissionHandler.has(committingPlayer, "waypoints.basic.return"))
+                    if (configs.getPermissionsMod() && !permissionHandler.has(committingPlayer, "waypoints.basic.return"))
+                    {
+                        committingPlayer.sendMessage("You do not have permissions to do that.");
+                        return true;
+                    }
+                    if (configs.getPermissionsBukkit() && !committingPlayer.hasPermission("waypoints.basic.return"))
                     {
                         committingPlayer.sendMessage("You do not have permissions to do that.");
                         return true;
@@ -322,6 +380,11 @@ public class Waypoints extends JavaPlugin
         {
         }
         return false;
+    }
+
+    public void setConfigs(Configurations configs)
+    {
+        this.configs = configs;
     }
 
     /*
@@ -387,11 +450,13 @@ public class Waypoints extends JavaPlugin
             }
 
             if (committingPlayer != null)
+            {
                 committingPlayer.sendMessage("Waypoints have been loaded.");
+            }
             return true;
         } catch (FileNotFoundException ex)
         {
-            log.info("Failed to read items for waypoints. Do files exist?");
+            ex.printStackTrace();
         }
 
         return false;
@@ -515,13 +580,80 @@ public class Waypoints extends JavaPlugin
             zWriter.close();
 
             if (committingPlayer != null)
+            {
                 committingPlayer.sendMessage("Waypoints have been saved.");
+            }
             return true;
         } catch (FileNotFoundException ex)
         {
-            log.info("Failed to write files for waypoints.");
+            ex.printStackTrace();
         }
 
+        return false;
+    }
+
+    public boolean loadConfigurations()
+    {
+        String configPath = "./plugins/Waypoints";
+        File configFile = new File(configPath + "/configs.cfg");
+
+        Properties prop = new Properties();
+
+        if (!new File(configPath).isDirectory())
+        {
+            new File(configPath).mkdir();
+        }
+        configs = new Configurations();
+
+        FileInputStream input = null;
+        try
+        {
+            input = new FileInputStream(configFile);
+            prop.load(input);
+            configs.permissionsMod = Boolean.parseBoolean(prop.getProperty("permissionsMod"));
+            configs.permissionsBukkit = Boolean.parseBoolean(prop.getProperty("permissionsBukkit"));
+            input.close();
+        } catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean saveConfigurations()
+    {
+        String configPath = "./plugins/Waypoints";
+        File configFile = new File(configPath + "/configs.cfg");
+
+        Properties prop = new Properties();
+
+        if (!new File(configPath).isDirectory())
+        {
+            new File(configPath).mkdir();
+        }
+        if (!configFile.exists())
+        {
+            try
+            {
+                configFile.createNewFile();
+            } catch (IOException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+        FileOutputStream configOutput;
+        try
+        {
+            configOutput = new FileOutputStream(configFile);
+            prop.put("permissionsMod", "" + configs.permissionsMod);
+            prop.put("permissionsBukkit", "" + configs.permissionsBukkit);
+            prop.store(configOutput, "Permissions values can only be true and false");
+            configOutput.flush();
+            configOutput.close();
+        } catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
         return false;
     }
 }

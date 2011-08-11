@@ -605,17 +605,21 @@ public class Waypoints extends JavaPlugin
         }
         configs = new Configurations();
 
-        FileInputStream input = null;
-        try
+        if (configFile.exists())
         {
-            input = new FileInputStream(configFile);
-            prop.load(input);
-            configs.permissionsMod = Boolean.parseBoolean(prop.getProperty("permissionsMod"));
-            configs.permissionsBukkit = Boolean.parseBoolean(prop.getProperty("permissionsBukkit"));
-            input.close();
-        } catch (Exception ex)
-        {
-            ex.printStackTrace();
+            FileInputStream input = null;
+            try
+            {
+                input = new FileInputStream(configFile);
+                prop.load(input);
+                configs.permissionsMod = Boolean.parseBoolean(prop.getProperty("permissionsMod"));
+                configs.permissionsBukkit = Boolean.parseBoolean(prop.getProperty("permissionsBukkit"));
+                input.close();
+                return true;
+            } catch (Exception ex)
+            {
+                ex.printStackTrace();
+            }
         }
         return false;
     }

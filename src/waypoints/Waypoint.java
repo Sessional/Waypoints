@@ -1,16 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package waypoints;
 
 import org.bukkit.Location;
 
-/**
- *
- * @author Andrew
- */
 public class Waypoint {
     Waypoint(String name, Location location)
     {

@@ -1,16 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package waypoints;
 
 import org.bukkit.entity.Player;
 
-/**
- *
- * @author Andrew
- */
 public class PermissionsBukkitHandler extends PermissionBase {
 
     public PermissionsBukkitHandler(Waypoints waypoints)

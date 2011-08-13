@@ -4,8 +4,20 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Logger;
+
+import java.beans.XMLEncoder;
+import java.beans.XMLDecoder;
+
 import org.bukkit.Location;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
@@ -16,21 +28,6 @@ import org.bukkit.plugin.java.*;
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
 
-import java.beans.XMLEncoder;
-import java.beans.XMLDecoder;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-/**
- *
- * @author Andrew
- */
 public class Waypoints extends JavaPlugin
 {
 
@@ -99,7 +96,7 @@ public class Waypoints extends JavaPlugin
         pm = null;
 
         saveWaypoints(null);
-        log.info("World's Waypoints has unloaded.");
+        log.info("Waypoints has unloaded.");
         log = null;
     }
 
@@ -112,15 +109,10 @@ public class Waypoints extends JavaPlugin
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args)
     {
-        try
+        if (cmd.getName().equalsIgnoreCase("waypoints") || cmd.getName().equalsIgnoreCase("wps"))
         {
-            if (cmd.getName().equalsIgnoreCase("waypoints"))
-            {
-                Player committingPlayer = (Player) sender;
-                return commandHandler.handleCommand(committingPlayer, args);
-            }
-        } catch (Exception e)
-        {
+            Player committingPlayer = (Player) sender;
+            return commandHandler.handleCommand(committingPlayer, args);
         }
         return false;
     }
@@ -183,7 +175,6 @@ public class Waypoints extends JavaPlugin
                 zCoords = (int[]) zReader.readObject();
                 zReader.close();
             }
-
             if (waypoints != null && worlds != null && xCoords != null && yCoords != null && zCoords != null)
             {
                 for (int i = 0; i < waypoints.length; i++)
@@ -191,7 +182,6 @@ public class Waypoints extends JavaPlugin
                     waypointList.add(new Waypoint(waypoints[i], new Location(getServer().getWorld(worlds[i]), xCoords[i], yCoords[i], zCoords[i])));
                 }
             }
-
             if (committingPlayer != null)
             {
                 committingPlayer.sendMessage("Waypoints have been loaded.");
@@ -201,7 +191,6 @@ public class Waypoints extends JavaPlugin
         {
             ex.printStackTrace();
         }
-
         return false;
     }
 
@@ -220,14 +209,12 @@ public class Waypoints extends JavaPlugin
             yCoords[i] = waypointList.get(i).location.getBlockY();
             zCoords[i] = waypointList.get(i).location.getBlockZ();
         }
-
         String waypointsNamePath = "./plugins/Waypoints/names.xml";
         String worldsPath = "./plugins/Waypoints/worlds.xml";
         String xCoordsPath = "./plugins/Waypoints/xCoords.xml";
         String yCoordsPath = "./plugins/Waypoints/yCoords.xml";
         String zCoordsPath = "./plugins/Waypoints/zCoords.xml";
         String pluginPath = "./plugins/Waypoints";
-
         File waypointsFile = new File(waypointsNamePath);
         File worldsFile = new File(worldsPath);
         File xCoordsFile = new File(xCoordsPath);
@@ -260,8 +247,6 @@ public class Waypoints extends JavaPlugin
             nameWriter.writeObject(waypoints);
             nameWriter.flush();
             nameWriter.close();
-
-
             if (!worldsFile.exists())
             {
                 try
@@ -276,7 +261,6 @@ public class Waypoints extends JavaPlugin
             worldWriter.writeObject(worlds);
             worldWriter.flush();
             worldWriter.close();
-
             if (!xCoordsFile.exists())
             {
                 try
@@ -291,7 +275,6 @@ public class Waypoints extends JavaPlugin
             xWriter.writeObject(xCoords);
             xWriter.flush();
             xWriter.close();
-
             if (!yCoordsFile.exists())
             {
                 try
@@ -306,12 +289,11 @@ public class Waypoints extends JavaPlugin
             yWriter.writeObject(yCoords);
             yWriter.flush();
             yWriter.close();
-
-            if (!worldsFile.exists())
+            if (!zCoordsFile.exists())
             {
                 try
                 {
-                    worldsFile.createNewFile();
+                    zCoordsFile.createNewFile();
                 } catch (IOException ex)
                 {
                     log.info("Failed to create /waypoints/zCoords.xml for Waypoints");
@@ -321,7 +303,6 @@ public class Waypoints extends JavaPlugin
             zWriter.writeObject(zCoords);
             zWriter.flush();
             zWriter.close();
-
             if (committingPlayer != null)
             {
                 committingPlayer.sendMessage("Waypoints have been saved.");
@@ -331,7 +312,6 @@ public class Waypoints extends JavaPlugin
         {
             ex.printStackTrace();
         }
-
         return false;
     }
 
@@ -339,15 +319,12 @@ public class Waypoints extends JavaPlugin
     {
         String configPath = "./plugins/Waypoints";
         File configFile = new File(configPath + "/configs.cfg");
-
         Properties prop = new Properties();
-
         if (!new File(configPath).isDirectory())
         {
             new File(configPath).mkdir();
         }
         configs = new Configurations();
-
         if (configFile.exists())
         {
             FileInputStream input = null;
@@ -371,7 +348,6 @@ public class Waypoints extends JavaPlugin
     {
         String configPath = "./plugins/Waypoints";
         File configFile = new File(configPath + "/configs.cfg");
-
         Properties prop = new Properties();
 
         if (!new File(configPath).isDirectory())

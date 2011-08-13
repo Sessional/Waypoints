@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package waypoints;
 
 import java.util.ArrayList;
@@ -10,10 +5,6 @@ import java.util.ArrayList;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-/**
- *
- * @author Andrew
- */
 public abstract class PermissionBase {
     public Waypoints waypoints;
     public PermissionBase(Waypoints waypoints)
@@ -54,7 +45,6 @@ public abstract class PermissionBase {
                 return i;
             }
         }
-
         return -1;
     }
 
@@ -146,9 +136,7 @@ public abstract class PermissionBase {
         {
             dummyList.add(startList.get(i));
         }
-
         int smallestIndex = Integer.MAX_VALUE;
-
         for (int i = 0; i < dummyList.size(); i++)
         {
             if (smallestIndex == Integer.MAX_VALUE || dummyList.get(i).name.compareTo(dummyList.get(smallestIndex).name) < 0)
@@ -172,15 +160,12 @@ public abstract class PermissionBase {
         {
             dummyList.add(waypoints.waypointList.get(i));
         }
-
         ArrayList<Waypoint> sortedList = new ArrayList<Waypoint>();
         sort(dummyList, sortedList);
-
         for (int i = 0; i < sortedList.size(); i++)
         {
             committingPlayer.sendMessage("§e" + sortedList.get(i).name + "§f [x,y,z] ["
                     + (int) sortedList.get(i).location.getX() + "," + (int) sortedList.get(i).location.getY() + "," + (int) sortedList.get(i).location.getZ() + "]");
-
         }
         return true;
     }

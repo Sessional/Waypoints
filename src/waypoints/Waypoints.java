@@ -189,7 +189,6 @@ public class Waypoints extends JavaPlugin
             return true;
         } catch (FileNotFoundException ex)
         {
-            ex.printStackTrace();
         }
         return false;
     }
@@ -310,7 +309,6 @@ public class Waypoints extends JavaPlugin
             return true;
         } catch (FileNotFoundException ex)
         {
-            ex.printStackTrace();
         }
         return false;
     }
@@ -338,7 +336,6 @@ public class Waypoints extends JavaPlugin
                 return true;
             } catch (Exception ex)
             {
-                ex.printStackTrace();
             }
         }
         return false;
@@ -361,7 +358,6 @@ public class Waypoints extends JavaPlugin
                 configFile.createNewFile();
             } catch (IOException ex)
             {
-                ex.printStackTrace();
             }
         }
         FileOutputStream configOutput;
@@ -375,7 +371,6 @@ public class Waypoints extends JavaPlugin
             configOutput.close();
         } catch (Exception ex)
         {
-            ex.printStackTrace();
         }
         return false;
     }

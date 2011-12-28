@@ -41,7 +41,7 @@ public class PermissionsHandler extends PermissionBase
                 committingPlayer.sendMessage("You do not have permissions to do that.");
                 return true;
             }
-            return deleteWaypoint(args);
+            return deleteWaypoint(committingPlayer, args);
         } else if (subCommand.equalsIgnoreCase("save"))
         {
             if (!permissionHandler.has(committingPlayer, "waypoints.admin.save"))

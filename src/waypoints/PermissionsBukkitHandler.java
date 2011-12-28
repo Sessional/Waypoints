@@ -35,7 +35,7 @@ public class PermissionsBukkitHandler extends PermissionBase {
                 committingPlayer.sendMessage("You do not have permissions to do that.");
                 return true;
             }
-            return deleteWaypoint(args);
+            return deleteWaypoint(committingPlayer, args);
         } else if (subCommand.equalsIgnoreCase("save"))
         {
             if (!committingPlayer.hasPermission("waypoints.admin.save"))

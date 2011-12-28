@@ -21,7 +21,7 @@ public class PermissionsDefault extends PermissionBase
             return goWaypoint(committingPlayer, args);
         } else if (subCommand.equalsIgnoreCase("delete"))
         {
-            return deleteWaypoint(args);
+            return deleteWaypoint(committingPlayer, args);
         } else if (subCommand.equalsIgnoreCase("save"))
         {
             waypoints.saveConfigurations();

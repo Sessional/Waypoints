@@ -48,7 +48,7 @@ public abstract class PermissionBase {
         return -1;
     }
 
-    public boolean deleteWaypoint(String[] args)
+    public boolean deleteWaypoint(Player committingPlayer, String[] args)
     {
         String name = args[1];
         if (doesWaypointExist(name))
@@ -57,9 +57,11 @@ public abstract class PermissionBase {
             if (index != -1)
             {
                 waypoints.waypointList.remove(index);
+                committingPlayer.sendMessage("Waypoint '" + name + "' deleted.");
                 return true;
             }
         }
+        committingPlayer.sendMessage("Waypoint '" + name + "' not found!");
         return false;
     }
 

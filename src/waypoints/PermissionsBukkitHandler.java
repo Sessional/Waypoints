@@ -12,7 +12,7 @@ public class PermissionsBukkitHandler extends PermissionBase {
     public boolean handleCommand(Player committingPlayer, String[] args)
     {
         String subCommand = args[0];
-        if (subCommand.equalsIgnoreCase("create") || args[0].equalsIgnoreCase("add"))
+        if (subCommand.equalsIgnoreCase("create") ||subCommand.equalsIgnoreCase("add"))
         {
             if (!committingPlayer.hasPermission("waypoints.admin.create"))
             {

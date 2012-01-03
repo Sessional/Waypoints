@@ -5,12 +5,16 @@ import java.util.ArrayList;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-public abstract class PermissionBase {
+public abstract class PermissionBase
+{
+
     public Waypoints waypoints;
+
     public PermissionBase(Waypoints waypoints)
     {
         this.waypoints = waypoints;
     }
+
     public abstract boolean handleCommand(Player committingPlayer, String[] args);
 
     public boolean doesWaypointExist(String name)
@@ -24,6 +28,7 @@ public abstract class PermissionBase {
         }
         return false;
     }
+
     public Waypoint getWaypoint(String name)
     {
         for (int i = 0; i < waypoints.waypointList.size(); i++)
@@ -81,6 +86,24 @@ public abstract class PermissionBase {
         return false;
     }
 
+    public void insertPoint(Waypoint waypoint, int low, int high)
+    {
+
+        int mid = (low + high) / 2;
+        while (mid != high && mid != low && low != high)
+        {
+            if (waypoint.compareTo(waypoints.waypointList.get(mid)) < 0)
+            {
+                high = mid - 1;
+            } else if (waypoint.compareTo(waypoints.waypointList.get(mid)) > 0)
+            {
+                low = mid + 1;
+            }
+            mid = (low + high) / 2;
+        }
+        waypoints.waypointList.add(mid, waypoint);
+    }
+
     public boolean createWaypoint(Player committingPlayer, String[] args)
     {
         String name = args[1];
@@ -97,7 +120,7 @@ public abstract class PermissionBase {
         }
         if (!doesWaypointExist(name))
         {
-            waypoints.waypointList.add(new Waypoint(name, loc));
+            insertPoint(new Waypoint(name, loc), 0, waypoints.waypointList.size() - 1);
             committingPlayer.sendMessage("Waypoint " + name + " created at " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + ".");
             return true;
         } else
@@ -169,6 +192,8 @@ public abstract class PermissionBase {
     public boolean listWaypoints(Player committingPlayer, String[] args)
     {
         String worldToList = "";
+        int pageToList = -1;
+        int pageSize = 9;
         if (args.length >= 3)
         {
             if (args[1].equalsIgnoreCase("world"))
@@ -182,18 +207,47 @@ public abstract class PermissionBase {
                     worldToList = worldToList + args[i];
                 }
             }
+
+            if (args[1].equalsIgnoreCase("page"))
+            {
+                pageToList = Integer.parseInt(args[2]);
+            }
         }
-        ArrayList<Waypoint> dummyList = new ArrayList<Waypoint>();
+        /*ArrayList<Waypoint> dummyList = new ArrayList<Waypoint>();
         for (int i = 0; i < waypoints.waypointList.size(); i++)
         {
-            dummyList.add(waypoints.waypointList.get(i));
+        dummyList.add(waypoints.waypointList.get(i));
         }
         ArrayList<Waypoint> sortedList = new ArrayList<Waypoint>();
-        sort(dummyList, sortedList, worldToList);
-        for (int i = 0; i < sortedList.size(); i++)
+        sort(dummyList, sortedList, worldToList);*/
+        if (pageToList == -1)
         {
-            committingPlayer.sendMessage("§e" + sortedList.get(i).name + "§f [" + sortedList.get(i).location.getWorld().getName() + "][x,y,z] ["
-                    + (int) sortedList.get(i).location.getX() + "," + (int) sortedList.get(i).location.getY() + "," + (int) sortedList.get(i).location.getZ() + "]");
+            for (int i = 0; i < waypoints.waypointList.size(); i++)
+            {
+                committingPlayer.sendMessage("§e" + waypoints.waypointList.get(i).name + "§f [" + waypoints.waypointList.get(i).location.getWorld().getName() + "][x,y,z] ["
+                        + (int) waypoints.waypointList.get(i).location.getX() + "," + (int) waypoints.waypointList.get(i).location.getY() + "," + (int) waypoints.waypointList.get(i).location.getZ() + "]");
+            }
+        } else
+        {
+            int numToList = pageToList * pageSize;
+            if (numToList < waypoints.waypointList.size())
+            {
+                committingPlayer.sendMessage("Page " + pageToList);
+                for (int i = (pageToList - 1) * pageSize; i < pageToList * pageSize; i++)
+                {
+                    committingPlayer.sendMessage("§e" + waypoints.waypointList.get(i).name + "§f [" + waypoints.waypointList.get(i).location.getWorld().getName() + "][x,y,z] ["
+                            + (int) waypoints.waypointList.get(i).location.getX() + "," + (int) waypoints.waypointList.get(i).location.getY() + "," + (int) waypoints.waypointList.get(i).location.getZ() + "]");
+                }
+            }
+            else
+            {
+                committingPlayer.sendMessage("Page " + pageToList);
+                for (int i = (pageToList - 1) * pageSize; i < waypoints.waypointList.size(); i++)
+                {
+                    committingPlayer.sendMessage("§e" + waypoints.waypointList.get(i).name + "§f [" + waypoints.waypointList.get(i).location.getWorld().getName() + "][x,y,z] ["
+                            + (int) waypoints.waypointList.get(i).location.getX() + "," + (int) waypoints.waypointList.get(i).location.getY() + "," + (int) waypoints.waypointList.get(i).location.getZ() + "]");
+                }
+            }
         }
         return true;
     }

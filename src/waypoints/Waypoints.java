@@ -8,7 +8,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +26,8 @@ import org.bukkit.plugin.java.*;
 
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
+import java.util.Collections;
+import java.util.LinkedList;
 
 public class Waypoints extends JavaPlugin
 {
@@ -36,7 +37,7 @@ public class Waypoints extends JavaPlugin
      */
     Logger log = Logger.getLogger("Minecraft");
     PluginManager pm;
-    public List<Waypoint> waypointList = new ArrayList<Waypoint>();
+    public List<Waypoint> waypointList = new LinkedList<Waypoint>();
     public Map<Player, Location> lastLocation = new HashMap<Player, Location>();
     public static PermissionHandler permissionHandler;
     public Configurations configs;
@@ -65,7 +66,13 @@ public class Waypoints extends JavaPlugin
                 commandHandler = new PermissionsDefault(this);
             }
         }
+        sortWaypoints();
         log.info("Waypoints has loaded.");
+    }
+
+    private void sortWaypoints()
+    {
+        Collections.sort(waypointList);
     }
 
     public void setupPermissions()

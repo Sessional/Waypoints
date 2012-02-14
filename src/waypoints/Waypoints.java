@@ -116,6 +116,11 @@ public class Waypoints extends JavaPlugin
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args)
     {
+        if (args.length == 0)
+        {
+            ((Player)sender).sendMessage("Please input at least one argument.");
+            return true;
+        }
         if (cmd.getName().equalsIgnoreCase("waypoints") || cmd.getName().equalsIgnoreCase("wps"))
         {
             Player committingPlayer = (Player) sender;

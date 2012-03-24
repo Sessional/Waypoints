@@ -1,7 +1,6 @@
 package waypoints;
 
 import java.util.ArrayList;
-
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -69,6 +68,12 @@ public abstract class PermissionBase
         committingPlayer.sendMessage("Waypoint '" + name + "' not found!");
         return false;
     }
+    
+    public boolean showVersion(Player committingPlayer, String[] args)
+    {
+        committingPlayer.sendMessage(waypoints.getVersion());
+        return true;
+    }
 
     public boolean goWaypoint(Player committingPlayer, String[] args)
     {
@@ -80,7 +85,9 @@ public abstract class PermissionBase
                 waypoints.lastLocation.remove(committingPlayer);
             }
             waypoints.lastLocation.put(committingPlayer, committingPlayer.getLocation());
-            committingPlayer.teleport(getWaypoint(name).location);
+            Waypoint waypoint = getWaypoint(name);
+            Location tpLoc = new Location(waypoint.location.getWorld(), waypoint.location.getX(), waypoint.location.getY(), waypoint.location.getZ());
+            committingPlayer.teleport(tpLoc);
             return true;
         }
         return false;

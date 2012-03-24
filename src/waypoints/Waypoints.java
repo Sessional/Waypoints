@@ -35,6 +35,7 @@ public class Waypoints extends JavaPlugin
     /**
      * Configuration fields
      */
+    String versionNum = "0.7";
     Logger log = Logger.getLogger("Minecraft");
     PluginManager pm;
     public List<Waypoint> waypointList = new LinkedList<Waypoint>();
@@ -67,7 +68,7 @@ public class Waypoints extends JavaPlugin
             }
         }
         sortWaypoints();
-        log.info("Waypoints has loaded.");
+        log.info("Waypoints has loaded: version: " + versionNum);
     }
 
     private void sortWaypoints()
@@ -127,6 +128,11 @@ public class Waypoints extends JavaPlugin
             return commandHandler.handleCommand(committingPlayer, args);
         }
         return false;
+    }
+    
+    public String getVersion()
+    {
+        return "Waypoints is version: " + versionNum;
     }
 
     public void setConfigs(Configurations configs)

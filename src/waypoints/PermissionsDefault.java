@@ -35,6 +35,9 @@ public class PermissionsDefault extends PermissionBase
         } else if (subCommand.equalsIgnoreCase("return"))
         {
             return returnToPoint(committingPlayer, args);
+        } else if (subCommand.equalsIgnoreCase("version"))
+        {
+            return showVersion(committingPlayer, args);
         }
         return false;
     }

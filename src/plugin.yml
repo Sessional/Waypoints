@@ -2,7 +2,7 @@
 ---
 name: "Waypoints"
 main: waypoints.Waypoints
-version: "0.4"
+version: "0.7"
 commands:
      wps:
         description: go to a waypoint
@@ -42,3 +42,6 @@ commands:
         description: save waypoints
         usage: /<command> save
         permissions: waypoint.admin.save
+     waypoints version:
+       description: shows version number
+       usage: /waypoints version

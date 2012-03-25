@@ -35,7 +35,7 @@ public class Waypoints extends JavaPlugin
     /**
      * Configuration fields
      */
-    String versionNum = "0.7";
+    String versionNum = "0.8";
     Logger log = Logger.getLogger("Minecraft");
     PluginManager pm;
     public List<Waypoint> waypointList = new LinkedList<Waypoint>();
@@ -152,9 +152,9 @@ public class Waypoints extends JavaPlugin
         String zCoordsPath = "./plugins/Waypoints/zCoords.xml";
         String[] waypoints = null;
         String[] worlds = null;
-        int[] xCoords = null;
-        int[] yCoords = null;
-        int[] zCoords = null;
+        double[] xCoords = null;
+        double[] yCoords = null;
+        double[] zCoords = null;
         File waypointsFile = new File(waypointsNamePath);
         File worldsFile = new File(worldsPath);
         File xCoordsFile = new File(xCoordsPath);
@@ -178,19 +178,19 @@ public class Waypoints extends JavaPlugin
             if (xCoordsFile.exists() && xCoordsFile.canRead())
             {
                 XMLDecoder xReader = new XMLDecoder(new BufferedInputStream(new FileInputStream(xCoordsPath)));
-                xCoords = (int[]) xReader.readObject();
+                xCoords = (double[]) xReader.readObject();
                 xReader.close();
             }
             if (yCoordsFile.exists() && yCoordsFile.canRead())
             {
                 XMLDecoder yReader = new XMLDecoder(new BufferedInputStream(new FileInputStream(yCoordsPath)));
-                yCoords = (int[]) yReader.readObject();
+                yCoords = (double[]) yReader.readObject();
                 yReader.close();
             }
             if (zCoordsFile.exists() && zCoordsFile.canRead())
             {
                 XMLDecoder zReader = new XMLDecoder(new BufferedInputStream(new FileInputStream(zCoordsPath)));
-                zCoords = (int[]) zReader.readObject();
+                zCoords = (double[]) zReader.readObject();
                 zReader.close();
             }
             if (waypoints != null && worlds != null && xCoords != null && yCoords != null && zCoords != null)
@@ -215,16 +215,16 @@ public class Waypoints extends JavaPlugin
     {
         String[] waypoints = new String[waypointList.size()];
         String[] worlds = new String[waypointList.size()];
-        int[] xCoords = new int[waypointList.size()];
-        int[] yCoords = new int[waypointList.size()];
-        int[] zCoords = new int[waypointList.size()];
+        double[] xCoords = new double[waypointList.size()];
+        double[] yCoords = new double[waypointList.size()];
+        double[] zCoords = new double[waypointList.size()];
         for (int i = 0; i < waypointList.size(); i++)
         {
             waypoints[i] = waypointList.get(i).name;
             worlds[i] = waypointList.get(i).location.getWorld().getName();
-            xCoords[i] = waypointList.get(i).location.getBlockX();
-            yCoords[i] = waypointList.get(i).location.getBlockY();
-            zCoords[i] = waypointList.get(i).location.getBlockZ();
+            xCoords[i] = waypointList.get(i).location.getX();
+            yCoords[i] = waypointList.get(i).location.getY();
+            zCoords[i] = waypointList.get(i).location.getZ();
         }
         String waypointsNamePath = "./plugins/Waypoints/names.xml";
         String worldsPath = "./plugins/Waypoints/worlds.xml";

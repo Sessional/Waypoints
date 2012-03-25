@@ -62,6 +62,7 @@ public abstract class PermissionBase
             {
                 waypoints.waypointList.remove(index);
                 committingPlayer.sendMessage("Waypoint '" + name + "' deleted.");
+                waypoints.saveWaypoints(null);
                 return true;
             }
         }
@@ -86,7 +87,7 @@ public abstract class PermissionBase
             }
             waypoints.lastLocation.put(committingPlayer, committingPlayer.getLocation());
             Waypoint waypoint = getWaypoint(name);
-            Location tpLoc = new Location(waypoint.location.getWorld(), waypoint.location.getX(), waypoint.location.getY(), waypoint.location.getZ());
+            Location tpLoc = new Location(waypoint.location.getWorld(), waypoint.location.getX(), waypoint.location.getY()+2, waypoint.location.getZ());
             committingPlayer.teleport(tpLoc);
             return true;
         }
@@ -129,6 +130,7 @@ public abstract class PermissionBase
         {
             insertPoint(new Waypoint(name, loc), 0, waypoints.waypointList.size() - 1);
             committingPlayer.sendMessage("Waypoint " + name + " created at " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() + ".");
+                waypoints.saveWaypoints(null);
             return true;
         } else
         {

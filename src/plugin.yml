@@ -2,7 +2,7 @@
 ---
 name: "Waypoints"
 main: waypoints.Waypoints
-version: "0.7"
+version: "0.8"
 commands:
      wps:
         description: go to a waypoint

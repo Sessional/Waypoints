@@ -258,13 +258,14 @@ public class CommandHandler
                     return false;
                 }
 
+                System.out.println("Creating Waypoint");
                 getPlugin().getWaypoints().add(getInsertIndex(wp), new Waypoint(player.getLocation().getX(),
                         player.getLocation().getY() + 1, player.getLocation().getZ(),
                         wp, player.getWorld().getName()));
                 
                 player.sendMessage("Waypoint '" + wp + "' created at ["
                         + player.getLocation().getX() + ","
-                        + player.getLocation().getY() + ","
+                        + player.getLocation().getY() + 1 + ","
                         + player.getLocation().getZ() + "]");
 
                 getPlugin().saveData();
@@ -546,7 +547,7 @@ public class CommandHandler
         int high = getPlugin().getWaypoints().size() - 1;
         int mid = (low + high) / 2;
 
-        while (low != high)
+        while (low < high)
         {
             if (wp.compareTo(getPlugin().getWaypoints().get(mid).getName()) < 0)
             {

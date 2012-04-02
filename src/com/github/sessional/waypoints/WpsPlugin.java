@@ -46,7 +46,7 @@ public class WpsPlugin extends JavaPlugin
     /**
      * 
      */
-    private String version = "1.0";
+    private String version = "1.1";
     
     /**
      * 

@@ -162,7 +162,7 @@ public class CommandHandler
 
             Waypoint goTo = getWaypoint(wp);
             World world = getPlugin().getServer().getWorld(getWaypoint(wp).getWorld());
-            player.teleport(new Location(world, goTo.getX(), goTo.getY() + 2, goTo.getZ()));
+            player.teleport(new Location(world, goTo.getX(), goTo.getY() + 1, goTo.getZ()));
             return true;
         } else
         {
@@ -258,9 +258,8 @@ public class CommandHandler
                     return false;
                 }
 
-                System.out.println("Creating Waypoint");
                 getPlugin().getWaypoints().add(getInsertIndex(wp), new Waypoint(player.getLocation().getX(),
-                        player.getLocation().getY() + 1, player.getLocation().getZ(),
+                        (player.getLocation().getY() + 1.0), player.getLocation().getZ(),
                         wp, player.getWorld().getName()));
                 
                 player.sendMessage("Waypoint '" + wp + "' created at ["
@@ -283,18 +282,18 @@ public class CommandHandler
                     }
                     return false;
                 }
-                //TODO: implement creation at parameters points.
-                Waypoint newWp = new Waypoint(Double.parseDouble(remainingArgs[1]), Double.parseDouble(remainingArgs[2]), Double.parseDouble(remainingArgs[3]), wp, remainingArgs[0]);
+                
+                Waypoint newWp = new Waypoint(Double.parseDouble(remainingArgs[1]), (Double.parseDouble(remainingArgs[2]) + 1), Double.parseDouble(remainingArgs[3]), wp, remainingArgs[0]);
                 getPlugin().getWaypoints().add(getInsertIndex(wp), newWp);
                 if (player == null)
                 {
                     getPlugin().getLogger().info("Waypoint '" + wp + "'created at ["
-                            +  remainingArgs[1] + "," + remainingArgs[2]
+                            +  remainingArgs[1] + "," + (remainingArgs[2] + 1)
                             + "," + remainingArgs[3] + "]");
                 } else
                 {
                     player.sendMessage("Waypoint '" + wp + "'created at ["
-                            +  remainingArgs[1] + "," + remainingArgs[2]
+                            +  remainingArgs[1] + "," + (remainingArgs[2] + 1)
                             + "," + remainingArgs[3] + "]");
                 }
                 getPlugin().saveData();
@@ -533,12 +532,12 @@ public class CommandHandler
             return 0;
         }
 
-        if (wp.compareTo(getPlugin().getWaypoints().get(getPlugin().getWaypoints().size() - 1).getName()) > 0)
+        if (wp.compareToIgnoreCase(getPlugin().getWaypoints().get(getPlugin().getWaypoints().size() - 1).getName()) > 0)
         {
             return getPlugin().getWaypoints().size();
         }
 
-        if (wp.compareTo(getPlugin().getWaypoints().get(0).getName()) < 0)
+        if (wp.compareToIgnoreCase(getPlugin().getWaypoints().get(0).getName()) < 0)
         {
             return 0;
         }
@@ -549,10 +548,10 @@ public class CommandHandler
 
         while (low < high)
         {
-            if (wp.compareTo(getPlugin().getWaypoints().get(mid).getName()) < 0)
+            if (wp.compareToIgnoreCase(getPlugin().getWaypoints().get(mid).getName()) < 0)
             {
                 high = mid - 1;
-            } else if (wp.compareTo(getPlugin().getWaypoints().get(mid).getName()) > 0)
+            } else if (wp.compareToIgnoreCase(getPlugin().getWaypoints().get(mid).getName()) > 0)
             {
                 low = mid + 1;
             }

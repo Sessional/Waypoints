@@ -1,6 +1,6 @@
 name: "Waypoints"
 main: com.github.sessional.waypoints.WpsPlugin
-version: "1.0"
+version: "1.1"
 commands:
   wps:
     description: root command

@@ -16,9 +16,16 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.dynmap.Component;
+import org.dynmap.DynmapAPI;
+import org.dynmap.DynmapCore;
+import org.dynmap.markers.MarkerAPI;
+import org.dynmap.markers.MarkerIcon;
+import org.dynmap.markers.MarkerSet;
 
 public class WpsPlugin extends JavaPlugin
 {
+
     /**
      * 
      */
@@ -46,8 +53,14 @@ public class WpsPlugin extends JavaPlugin
     /**
      * 
      */
-    private String version = "1.1";
-    
+    private String version = "1.2";
+    /**
+     * 
+     */
+    private DynmapAPI dApi;
+    private MarkerAPI mark;
+    private MarkerSet set;
+
     /**
      * 
      */
@@ -55,7 +68,7 @@ public class WpsPlugin extends JavaPlugin
     public void onEnable()
     {
         log = getLogger();
-        
+
         saveFile = new File("./plugins/Waypoints/waypoints.dat");
         if (saveFile.exists())
         {
@@ -69,20 +82,20 @@ public class WpsPlugin extends JavaPlugin
             oldFiles.add(new File("./plugins/Waypoints/xCoords.xml"));
             oldFiles.add(new File("./plugins/Waypoints/yCoords.xml"));
             oldFiles.add(new File("./plugins/Waypoints/zCoords.xml"));
-            
+
             if (oldFilesExist())
             {
                 loadOldWaypoints();
                 this.saveData();
             }
         }
-        
+
         configFile = new File("./plugins/Waypoints/config.yml");
         if (!configFile.exists())
         {
             this.saveDefaultConfig();
         }
-        
+
         if (this.getConfig().getBoolean("bukkitPermissions") == true)
         {
             commandHandler = new BukkitCommandHandler(this);
@@ -90,10 +103,33 @@ public class WpsPlugin extends JavaPlugin
         {
             commandHandler = new CommandHandler(this);
         }
-        
+
+        if (this.getConfig().getBoolean("dynmapSupport") == true)
+        {
+            dApi = (DynmapAPI) getServer().getPluginManager().getPlugin("dynmap");
+
+            mark = dApi.getMarkerAPI();
+            set = mark.createMarkerSet("waypointMarkers", "waypoints", null, false);
+            set.setLabelShow(true);
+            enableDynMapSupport();
+        }
+
         log.info("Waypoints is now enabled.");
     }
-    
+
+    private void enableDynMapSupport()
+    {
+        for (Waypoint w : getWaypoints())
+        {
+            set.createMarker("wp" + w.getName(), w.getName(), w.getWorld(), w.getX(), w.getY(), w.getZ(), mark.getMarkerIcon("redflag"), true);
+        }
+    }
+
+    public void addToDynMap(Waypoint wp)
+    {
+        set.createMarker("wp" + wp.getName(), wp.getName(), wp.getWorld(), wp.getX(), wp.getY(), wp.getZ(), mark.getMarkerIcon("redflag"), true);
+    }
+
     /**
      * 
      * @return 
@@ -109,7 +145,7 @@ public class WpsPlugin extends JavaPlugin
         }
         return true;
     }
-    
+
     /**
      * 
      * @return 
@@ -118,7 +154,7 @@ public class WpsPlugin extends JavaPlugin
     {
         return waypointData;
     }
-    
+
     /**
      * 
      */
@@ -132,7 +168,7 @@ public class WpsPlugin extends JavaPlugin
         log = null;
         oldFiles = null;
     }
-    
+
     /**
      * 
      * @param sender
@@ -149,7 +185,7 @@ public class WpsPlugin extends JavaPlugin
         {
             player = (Player) sender;
         }
-        
+
         if (args.length <= 0)
         {
             if (player == null)
@@ -161,7 +197,7 @@ public class WpsPlugin extends JavaPlugin
             }
             return true;
         }
-        
+
         String subCommand = args[0];
         String[] remainingArgs = null;
         if (args.length > 1)
@@ -174,7 +210,12 @@ public class WpsPlugin extends JavaPlugin
         }
         return commandHandler.handleCommand(player, subCommand, remainingArgs);
     }
-    
+
+    public CommandHandler getCommandHandler()
+    {
+        return commandHandler;
+    }
+
     /**
      * Attempts to save the waypoint list into a single save file
      * @return true if it works, false if not
@@ -191,7 +232,7 @@ public class WpsPlugin extends JavaPlugin
             BufferedOutputStream bOut = new BufferedOutputStream(fsOut);
             ObjectOutputStream oOut = new ObjectOutputStream(bOut);
             oOut.writeObject(waypointData);
-            
+
             oOut.close();
         } catch (Exception ex)
         {
@@ -200,7 +241,7 @@ public class WpsPlugin extends JavaPlugin
         }
         return true;
     }
-    
+
     /**
      * Loads the new single save file for Waypoints data
      * @return true if it works, false if not.
@@ -221,7 +262,7 @@ public class WpsPlugin extends JavaPlugin
         }
         return true;
     }
-    
+
     /**
      * Will get the version number alone as a string
      * @return the version number as a string
@@ -230,7 +271,7 @@ public class WpsPlugin extends JavaPlugin
     {
         return version;
     }
-    
+
     /**
      * Loads old waypoint data from the 5 file system so that the program can
      * update it to the single save system
@@ -255,7 +296,7 @@ public class WpsPlugin extends JavaPlugin
         File zCoordsFile = oldFiles.get(4);
         try
         {
-            
+
             if (waypointsFile.exists() && waypointsFile.canRead())
             {
                 XMLDecoder nameReader = new XMLDecoder(new BufferedInputStream(new FileInputStream(waypointsFile)));

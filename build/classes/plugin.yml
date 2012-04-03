@@ -1,6 +1,6 @@
-name: "Waypoints"
+name: Waypoints
+version: 1.2
 main: com.github.sessional.waypoints.WpsPlugin
-version: "1.1"
 commands:
   wps:
     description: root command
@@ -8,3 +8,4 @@ commands:
   waypoints:
     description: root command
     usage: /<command> [subcommand] [args]
+depend: [dynmap]

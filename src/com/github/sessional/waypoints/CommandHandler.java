@@ -163,6 +163,7 @@ public class CommandHandler
             Waypoint goTo = getWaypoint(wp);
             World world = getPlugin().getServer().getWorld(getWaypoint(wp).getWorld());
             player.teleport(new Location(world, goTo.getX(), goTo.getY() + 1, goTo.getZ()));
+            player.sendMessage("Welcome to " + wp + "!");
             return true;
         } else
         {
@@ -208,7 +209,7 @@ public class CommandHandler
      * @param waypointName
      * @return 
      */
-    private boolean doesWaypointExist(String waypointName)
+    public boolean doesWaypointExist(String waypointName)
     {
         if (getWaypointIndex(waypointName) != -1)
         {
@@ -257,10 +258,10 @@ public class CommandHandler
                     getPlugin().getLogger().info("This command can not be called from console!");
                     return false;
                 }
-
-                getPlugin().getWaypoints().add(getInsertIndex(wp), new Waypoint(player.getLocation().getX(),
+                Waypoint w = new Waypoint(player.getLocation().getX(),
                         (player.getLocation().getY() + 1.0), player.getLocation().getZ(),
-                        wp, player.getWorld().getName()));
+                        wp, player.getWorld().getName());
+                getPlugin().getWaypoints().add(getInsertIndex(wp), w);
                 
                 player.sendMessage("Waypoint '" + wp + "' created at ["
                         + player.getLocation().getX() + ","
@@ -268,6 +269,10 @@ public class CommandHandler
                         + player.getLocation().getZ() + "]");
 
                 getPlugin().saveData();
+                if (getPlugin().getConfig().getBoolean("dynmapSupport") == true)
+                {
+                    getPlugin().addToDynMap(w);
+                }
                 return true;
             } else
             {
@@ -297,6 +302,11 @@ public class CommandHandler
                             + "," + remainingArgs[3] + "]");
                 }
                 getPlugin().saveData();
+                getPlugin().saveData();
+                if (getPlugin().getConfig().getBoolean("dynmapSupport") == true)
+                {
+                    getPlugin().addToDynMap(newWp);
+                }
                 return true;
             }
         }

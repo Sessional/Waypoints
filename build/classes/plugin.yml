@@ -8,4 +8,4 @@ commands:
   waypoints:
     description: root command
     usage: /<command> [subcommand] [args]
-depend: [dynmap]
+softdepend: [dynmap]

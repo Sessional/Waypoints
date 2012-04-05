@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.Component;
 import org.dynmap.DynmapAPI;
 import org.dynmap.DynmapCore;
+import org.dynmap.markers.Marker;
 import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerIcon;
 import org.dynmap.markers.MarkerSet;
@@ -53,7 +54,7 @@ public class WpsPlugin extends JavaPlugin
     /**
      * 
      */
-    private String version = "1.2";
+    private String version = "1.2.1";
     /**
      * 
      */
@@ -110,7 +111,7 @@ public class WpsPlugin extends JavaPlugin
 
             mark = dApi.getMarkerAPI();
             set = mark.createMarkerSet("waypointMarkers", "waypoints", null, false);
-            set.setLabelShow(true);
+            set.setLabelShow(false);
             enableDynMapSupport();
         }
 
@@ -121,7 +122,7 @@ public class WpsPlugin extends JavaPlugin
     {
         for (Waypoint w : getWaypoints())
         {
-            set.createMarker("wp" + w.getName(), w.getName(), w.getWorld(), w.getX(), w.getY(), w.getZ(), mark.getMarkerIcon("redflag"), true);
+            addToDynMap(w);
         }
     }
 
@@ -130,6 +131,17 @@ public class WpsPlugin extends JavaPlugin
         set.createMarker("wp" + wp.getName(), wp.getName(), wp.getWorld(), wp.getX(), wp.getY(), wp.getZ(), mark.getMarkerIcon("redflag"), true);
     }
 
+    public void removeFromDynMap(Waypoint wp)
+    {
+        for (Marker m : set.getMarkers())
+        {
+            if (m.getLabel().equalsIgnoreCase(wp.getName()))
+            {
+                m.deleteMarker();
+            }
+        }
+    }
+    
     /**
      * 
      * @return 
@@ -162,6 +174,10 @@ public class WpsPlugin extends JavaPlugin
     public void onDisable()
     {
         saveData();
+        for (Waypoint w : getWaypoints())
+        {
+            removeFromDynMap(w);
+        }
         commandHandler = null;
         waypointData = null;
         configFile = null;

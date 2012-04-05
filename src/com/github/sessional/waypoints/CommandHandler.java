@@ -1,6 +1,7 @@
 package com.github.sessional.waypoints;
 
 import java.util.HashMap;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -162,7 +163,13 @@ public class CommandHandler
 
             Waypoint goTo = getWaypoint(wp);
             World world = getPlugin().getServer().getWorld(getWaypoint(wp).getWorld());
-            player.teleport(new Location(world, goTo.getX(), goTo.getY() + 1, goTo.getZ()));
+            
+            int pX = (int)goTo.getX();
+            int pZ = (int)goTo.getZ();
+            Chunk chunk = world.getChunkAt(pX, pZ);
+            if (!chunk.isLoaded())
+                chunk.load();
+            player.teleport(new Location(world, goTo.getX(), goTo.getY(), goTo.getZ()));
             player.sendMessage("Welcome to " + wp + "!");
             return true;
         } else
@@ -258,14 +265,15 @@ public class CommandHandler
                     getPlugin().getLogger().info("This command can not be called from console!");
                     return false;
                 }
+                double newY = player.getLocation().getY() + 1.0;
                 Waypoint w = new Waypoint(player.getLocation().getX(),
-                        (player.getLocation().getY() + 1.0), player.getLocation().getZ(),
+                        newY, player.getLocation().getZ(),
                         wp, player.getWorld().getName());
                 getPlugin().getWaypoints().add(getInsertIndex(wp), w);
                 
                 player.sendMessage("Waypoint '" + wp + "' created at ["
                         + player.getLocation().getX() + ","
-                        + player.getLocation().getY() + 1 + ","
+                        + newY + ","
                         + player.getLocation().getZ() + "]");
 
                 getPlugin().saveData();
@@ -326,6 +334,7 @@ public class CommandHandler
         String wp = args[0];
         if (doesWaypointExist(wp))
         {
+            getPlugin().removeFromDynMap(getPlugin().getWaypoints().get(getWaypointIndex(wp)));
             getPlugin().getWaypoints().remove(getWaypointIndex(wp));
             if (player == null)
             {

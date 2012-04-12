@@ -173,7 +173,10 @@ public class WpsPlugin extends JavaPlugin
         saveData();
         for (Waypoint w : getWaypoints())
         {
-            removeFromDynMap(w);
+            if (getConfig().getBoolean("dynMapSupport") == true)
+            {
+                removeFromDynMap(w);
+            }
         }
         commandHandler = null;
         waypointData = null;

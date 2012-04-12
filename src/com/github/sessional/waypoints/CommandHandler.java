@@ -336,7 +336,7 @@ public class CommandHandler
         String wp = args[0];
         if (doesWaypointExist(wp))
         {
-            if (getPlugin().getConfig().getBoolean("dynMapSupport") == true)
+            if (getPlugin().getConfig().getBoolean("dynmapSupport") == true)
             {
                 getPlugin().removeFromDynMap(getPlugin().getWaypoints().get(getWaypointIndex(wp)));
             }

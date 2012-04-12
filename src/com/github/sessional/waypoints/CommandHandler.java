@@ -163,12 +163,14 @@ public class CommandHandler
 
             Waypoint goTo = getWaypoint(wp);
             World world = getPlugin().getServer().getWorld(getWaypoint(wp).getWorld());
-            
-            int pX = (int)goTo.getX();
-            int pZ = (int)goTo.getZ();
+
+            int pX = (int) goTo.getX();
+            int pZ = (int) goTo.getZ();
             Chunk chunk = world.getChunkAt(pX, pZ);
             if (!chunk.isLoaded())
+            {
                 chunk.load();
+            }
             player.teleport(new Location(world, goTo.getX(), goTo.getY(), goTo.getZ()));
             player.sendMessage("Welcome to " + wp + "!");
             return true;
@@ -270,7 +272,7 @@ public class CommandHandler
                         newY, player.getLocation().getZ(),
                         wp, player.getWorld().getName());
                 getPlugin().getWaypoints().add(getInsertIndex(wp), w);
-                
+
                 player.sendMessage("Waypoint '" + wp + "' created at ["
                         + player.getLocation().getX() + ","
                         + newY + ","
@@ -295,18 +297,18 @@ public class CommandHandler
                     }
                     return false;
                 }
-                
+
                 Waypoint newWp = new Waypoint(Double.parseDouble(remainingArgs[1]), (Double.parseDouble(remainingArgs[2]) + 1), Double.parseDouble(remainingArgs[3]), wp, remainingArgs[0]);
                 getPlugin().getWaypoints().add(getInsertIndex(wp), newWp);
                 if (player == null)
                 {
                     getPlugin().getLogger().info("Waypoint '" + wp + "'created at ["
-                            +  remainingArgs[1] + "," + (remainingArgs[2] + 1)
+                            + remainingArgs[1] + "," + (remainingArgs[2] + 1)
                             + "," + remainingArgs[3] + "]");
                 } else
                 {
                     player.sendMessage("Waypoint '" + wp + "'created at ["
-                            +  remainingArgs[1] + "," + (remainingArgs[2] + 1)
+                            + remainingArgs[1] + "," + (remainingArgs[2] + 1)
                             + "," + remainingArgs[3] + "]");
                 }
                 getPlugin().saveData();
@@ -334,7 +336,10 @@ public class CommandHandler
         String wp = args[0];
         if (doesWaypointExist(wp))
         {
-            getPlugin().removeFromDynMap(getPlugin().getWaypoints().get(getWaypointIndex(wp)));
+            if (getPlugin().getConfig().getBoolean("dynMapSupport") == true)
+            {
+                getPlugin().removeFromDynMap(getPlugin().getWaypoints().get(getWaypointIndex(wp)));
+            }
             getPlugin().getWaypoints().remove(getWaypointIndex(wp));
             if (player == null)
             {

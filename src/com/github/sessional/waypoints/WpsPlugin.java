@@ -16,12 +16,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.dynmap.Component;
 import org.dynmap.DynmapAPI;
-import org.dynmap.DynmapCore;
 import org.dynmap.markers.Marker;
 import org.dynmap.markers.MarkerAPI;
-import org.dynmap.markers.MarkerIcon;
 import org.dynmap.markers.MarkerSet;
 
 public class WpsPlugin extends JavaPlugin

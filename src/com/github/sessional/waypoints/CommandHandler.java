@@ -159,7 +159,11 @@ public class CommandHandler
             {
                 returnPoints.remove(player.getName());
             }
-            returnPoints.put(player.getName(), player.getLocation());
+            Location pLoc = player.getLocation();
+            double pLX = pLoc.getX();
+            double pLY = ((double)pLoc.getY()) + 1.0;
+            double pLZ = pLoc.getZ();
+            returnPoints.put(player.getName(), new Location(pLoc.getWorld(), pLX, pLY, pLZ));
 
             Waypoint goTo = getWaypoint(wp);
             World world = getPlugin().getServer().getWorld(getWaypoint(wp).getWorld());

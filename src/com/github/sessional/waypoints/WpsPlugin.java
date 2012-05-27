@@ -1,13 +1,29 @@
 package com.github.sessional.waypoints;
 
 import java.beans.XMLDecoder;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
+import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.conversations.Conversation;
+import org.bukkit.conversations.ConversationAbandonedEvent;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dynmap.DynmapAPI;
 import org.dynmap.markers.Marker;
@@ -20,7 +36,7 @@ public class WpsPlugin extends JavaPlugin
     /**
      * 
      */
-    private static final Logger log = Logger.getLogger("Minecraft");
+    private Logger log;
     /**
      * 
      */
@@ -58,6 +74,7 @@ public class WpsPlugin extends JavaPlugin
     @Override
     public void onEnable()
     {
+        log = getLogger();
 
         saveFile = new File("./plugins/Waypoints/waypoints.dat");
         if (saveFile.exists())
@@ -173,6 +190,7 @@ public class WpsPlugin extends JavaPlugin
         commandHandler = null;
         waypointData = null;
         configFile = null;
+        log = null;
         oldFiles = null;
     }
 

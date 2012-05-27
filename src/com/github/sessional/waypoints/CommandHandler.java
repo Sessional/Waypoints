@@ -1,7 +1,6 @@
 package com.github.sessional.waypoints;
 
 import java.util.HashMap;
-import java.util.logging.Level;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -79,7 +78,7 @@ public class CommandHandler
     {
         if (player == null)
         {
-            getPlugin().getLogger().log(Level.INFO, "Waypoints version: {0}", getPlugin().getVersion());
+            getPlugin().getLogger().info("Waypoints version: " + getPlugin().getVersion());
         } else
         {
             player.sendMessage("Waypoints version: " + getPlugin().getVersion());
@@ -256,7 +255,7 @@ public class CommandHandler
         {
             if (player == null)
             {
-                getPlugin().getLogger().log(Level.INFO, "A waypoint name ''{0}'' already exists.", wp);
+                getPlugin().getLogger().info("A waypoint name '" + wp + "' already exists.");
             } else
             {
                 player.sendMessage("A waypoint with name '" + wp + "' already exists.");
@@ -307,7 +306,9 @@ public class CommandHandler
                 getPlugin().getWaypoints().add(getInsertIndex(wp), newWp);
                 if (player == null)
                 {
-                    getPlugin().getLogger().log(Level.INFO, "Waypoint ''{0}''created at [{1},{2},{3}]", new Object[]{wp, remainingArgs[1], remainingArgs[2] + 1, remainingArgs[3]});
+                    getPlugin().getLogger().info("Waypoint '" + wp + "'created at ["
+                            + remainingArgs[1] + "," + (remainingArgs[2] + 1)
+                            + "," + remainingArgs[3] + "]");
                 } else
                 {
                     player.sendMessage("Waypoint '" + wp + "'created at ["
@@ -346,7 +347,7 @@ public class CommandHandler
             getPlugin().getWaypoints().remove(getWaypointIndex(wp));
             if (player == null)
             {
-                getPlugin().getLogger().log(Level.INFO, "Waypoint ''{0}'' deleted.", wp);
+                getPlugin().getLogger().info("Waypoint '" + wp + "' deleted.");
             } else
             {
                 player.sendMessage("Waypoint '" + wp + "' deleted.");
@@ -357,7 +358,7 @@ public class CommandHandler
         {
             if (player == null)
             {
-                getPlugin().getLogger().log(Level.INFO, "Waypoint ''{0}'' does not exist.", wp);
+                getPlugin().getLogger().info("Waypoint '" + wp + "' does not exist.");
             } else
             {
                 player.sendMessage("Waypoint '" + wp + "' does not exist.");
@@ -442,7 +443,9 @@ public class CommandHandler
         {
             for (Waypoint wp : getPlugin().getWaypoints())
             {
-                getPlugin().getLogger().log(Level.INFO, "{0}[{1}] [x,y,z] [{2},{3},{4}]", new Object[]{wp.getName(), wp.getWorld(), (int) wp.getX(), (int) wp.getY(), (int) wp.getZ()});
+                getPlugin().getLogger().info(wp.getName() + "[" + wp.getWorld()
+                        + "] [x,y,z] [" + (int) wp.getX() + "," + (int) wp.getY()
+                        + "," + (int) wp.getZ() + "]");
             }
             return true;
         }
@@ -471,11 +474,13 @@ public class CommandHandler
         {
             if (player == null)
             {
-                getPlugin().getLogger().log(Level.INFO, "Page {0}:", pageNumber);
+                getPlugin().getLogger().info("Page " + pageNumber + ":");
                 for (int i = lowerBound; i < getPlugin().getWaypoints().size(); i++)
                 {
                     Waypoint wp = getPlugin().getWaypoints().get(i);
-                    getPlugin().getLogger().log(Level.INFO, "{0} [{1}] [x,y,z] [{2},{3},{4}]", new Object[]{wp.getName(), wp.getWorld(), (int) wp.getX(), (int) wp.getY(), (int) wp.getZ()});
+                    getPlugin().getLogger().info(wp.getName() + " [" + wp.getWorld()
+                            + "] [x,y,z] [" + (int) wp.getX() + "," + (int) wp.getY()
+                            + "," + (int) wp.getZ() + "]");
                 }
                 return true;
             }
@@ -492,11 +497,13 @@ public class CommandHandler
         {
             if (player == null)
             {
-                getPlugin().getLogger().log(Level.INFO, "Page {0}:", pageNumber);
+                getPlugin().getLogger().info("Page " + pageNumber + ":");
                 for (int i = lowerBound; i < upperBound; i++)
                 {
                     Waypoint wp = getPlugin().getWaypoints().get(i);
-                    getPlugin().getLogger().log(Level.INFO, "{0} [{1}] [x,y,z] [{2},{3},{4}]", new Object[]{wp.getName(), wp.getWorld(), (int) wp.getX(), (int) wp.getY(), (int) wp.getZ()});
+                    getPlugin().getLogger().info(wp.getName() + " [" + wp.getWorld()
+                            + "] [x,y,z] [" + (int) wp.getX() + "," + (int) wp.getY()
+                            + "," + (int) wp.getZ() + "]");
                 }
                 return true;
             }
@@ -527,7 +534,9 @@ public class CommandHandler
             {
                 if (player == null)
                 {
-                    getPlugin().getLogger().log(Level.INFO, "{0} [{1}] [x,y,z] [{2},{3},{4}]", new Object[]{wp.getName(), wp.getWorld(), (int) wp.getX(), (int) wp.getY(), (int) wp.getZ()});
+                    getPlugin().getLogger().info(wp.getName() + " [" + wp.getWorld()
+                            + "] [x,y,z] [" + (int) wp.getX() + "," + (int) wp.getY()
+                            + "," + (int) wp.getZ() + "]");
                 } else
                 {
                     player.sendMessage("§e" + wp.getName() + "§f [" + wp.getWorld()

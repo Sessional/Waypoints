@@ -1,11 +1,11 @@
 name: Waypoints
 version: 1.2.2
 main: com.github.sessional.waypoints.WpsPlugin
+softdepend: [dynmap]
 commands:
   wps:
-    description: root command
+    description: A root command
     usage: /<command> [subcommand] [args]
   waypoints:
-    description: root command
+    description: A root command
     usage: /<command> [subcommand] [args]
-softdepend: [dynmap]

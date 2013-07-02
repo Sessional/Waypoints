@@ -1,4 +1,4 @@
 ## General settings
 ---
-bukkitPermissions: false
-dynmapSupport: false
+EnableDynmap: false
+EnablePermissions: false

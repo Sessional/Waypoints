@@ -152,6 +152,7 @@ public class CommandHandler
         if (player == null)
         {
             getPlugin().getLogger().info("This command can not be executed from console.");
+            return false;
         }
         String wp = args[0];
         if (doesWaypointExist(wp))

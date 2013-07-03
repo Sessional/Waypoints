@@ -1,5 +1,5 @@
 name: Waypoints
-version: 1.3.3
+version: 2.0
 main: waypoints.WaypointPlugin
 softdepend: [dynmap]
 commands:

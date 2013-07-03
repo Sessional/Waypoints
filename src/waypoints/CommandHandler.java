@@ -4,6 +4,8 @@
  */
 package waypoints;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import org.bukkit.entity.Player;
 
@@ -29,7 +31,15 @@ public class CommandHandler {
      */
     public void doGo(Player p, String waypointName)
     {
-        
+        if (plugin.doesWaypointExist(waypointName))
+        {
+            p.sendMessage("Welcome to " + waypointName + "!");
+            p.teleport(plugin.getWaypoint(waypointName).getLocation());
+        }
+        else
+        {
+            p.sendMessage("That waypoint doesn't seem to exist!");
+        }
     }
     
     /**
@@ -40,7 +50,14 @@ public class CommandHandler {
      */
     public void doListWorld(Player p, String worldName)
     {
-        
+        Collection<Waypoint> c = plugin.getSortedWaypoints();
+        for (Waypoint w : c)
+        {
+            if (w.getWorldName().equalsIgnoreCase(worldName))
+            {
+                p.sendMessage(w.getName());
+            }
+        }
     }
     
     /**
@@ -62,7 +79,15 @@ public class CommandHandler {
      */
     public void doCreateLocal(Player p, String waypointName)
     {
-        
+        if (!plugin.doesWaypointExist(waypointName))
+        {
+            plugin.getWaypointStorage().put(waypointName, new Waypoint(plugin, waypointName, p.getLocation()));
+            p.sendMessage("Created waypoint " + waypointName);
+        }
+        else
+        {
+            p.sendMessage("" + waypointName + " seems to already exist!");
+        }
     }
     
     /**
@@ -77,7 +102,15 @@ public class CommandHandler {
      */
     public void doCreateRemote(Player p, String waypointName, String worldName, float x, float y, float z)
     {
-        
+        if (!plugin.doesWaypointExist(waypointName))
+        {
+            plugin.getWaypointStorage().put(waypointName, new Waypoint(plugin, waypointName, worldName, x, y, z));
+            p.sendMessage("Created waypoint " + waypointName);
+        }
+        else
+        {
+            p.sendMessage("" + waypointName + " seems to already exist!");
+        }
     }
     
     /**
@@ -88,7 +121,15 @@ public class CommandHandler {
      */
     public void doDelete(Player p, String waypointName)
     {
-        
+        if (plugin.doesWaypointExist(waypointName))
+        {
+            plugin.getWaypointStorage().remove(waypointName);
+            p.sendMessage("Deleted " + waypointName + "!");
+        }
+        else
+        {
+            p.sendMessage("That waypoint doesn't seem to exist!");
+        }
     }
     
     /**
@@ -98,7 +139,15 @@ public class CommandHandler {
      */
     public void doReturn(Player p)
     {
-        
+        if (plugin.getReturnPoints().containsKey(p.getName()))
+        {
+            p.teleport(plugin.getReturnPoints().get(p.getName()));
+            plugin.getReturnPoints().remove(p.getName());
+        }
+        else
+        {
+            p.sendMessage("You have no return point to return to!");
+        }
     }
     
     /**
@@ -113,7 +162,7 @@ public class CommandHandler {
      */
     public boolean handlePlayerCommand(Player p, String wpsCommand,
             String[] additionalArgs) {
-
+        
         if (wpsCommand.equalsIgnoreCase("add") || wpsCommand.equalsIgnoreCase("create")) {
             //p.sendMessage("/wps <add|create> <name> [world] [x] [y] [z]");
 
@@ -131,9 +180,11 @@ public class CommandHandler {
                 float xCoord = Float.parseFloat(additionalArgs[2]);
                 float yCoord = Float.parseFloat(additionalArgs[3]);
                 float zCoord = Float.parseFloat(additionalArgs[4]);
-
+                doCreateRemote(p, name, world, xCoord, yCoord, zCoord);
                 return true;
             } else if (additionalArgs.length == 1) {
+                String name = additionalArgs[0];
+                doCreateLocal(p, name);
                 return true;
             } else {
                 handlePlayerHelp(p, "add");
@@ -152,6 +203,7 @@ public class CommandHandler {
 
             if (additionalArgs.length == 1) {
                 String name = additionalArgs[0];
+                doDelete(p, name);
                 return true;
             } else {
                 handlePlayerHelp(p, "remove");
@@ -169,8 +221,18 @@ public class CommandHandler {
             if (additionalArgs.length == 2) {
                 if (additionalArgs[0].equalsIgnoreCase("world")) {
                     String worldName = additionalArgs[1];
+                    this.doListWorld(p, worldName);
                 } else if (additionalArgs[0].equalsIgnoreCase("page")) {
                     int pageNumber = Integer.parseInt(additionalArgs[1]);
+                    this.doListPage(p, pageNumber);
+                }
+                return true;
+            } if (additionalArgs.length == 0)
+            {
+                Collection<Waypoint> c = plugin.getSortedWaypoints();
+                for (Waypoint w : c)
+                {
+                    p.sendMessage(w.getName());
                 }
                 return true;
             } else {
@@ -203,6 +265,7 @@ public class CommandHandler {
             }
             if (additionalArgs.length == 1) {
                 String destination = additionalArgs[0];
+                doGo(p, destination);
                 return true;
             } else {
                 handlePlayerHelp(p, "go");
@@ -220,8 +283,8 @@ public class CommandHandler {
     public void handlePlayerHelp(Player p) {
 
         p.sendMessage("Waypoints additional help:");
-        p.sendMessage("/wps can be substituted with /waypoints");
         p.sendMessage("type /wps help <command> for more help.");
+        p.sendMessage("wps can be substituted with waypoints");
         p.sendMessage("Waypoints uses a set of subcommands as follows:");
         p.sendMessage("/wps create");
         p.sendMessage("/wps add");
@@ -243,7 +306,7 @@ public class CommandHandler {
             p.sendMessage("Additional help for /wps add:");
             p.sendMessage("Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
-                    + "A parameter split with a | is an alias,\n"
+                    + "A parameter split with a | is an alias,"
                     + "either one can be used (but only one at a time)");
             p.sendMessage("/wps <add|create> <name> [world] [x] [y] [z]");
             p.sendMessage("Examples:\n");
@@ -257,7 +320,7 @@ public class CommandHandler {
             p.sendMessage("Additional help for /wps delete:");
             p.sendMessage("Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
-                    + "A parameter split with a | is an alias,\n"
+                    + "A parameter split with a | is an alias,"
                     + "either one can be used (but only one at a time)");
             p.sendMessage("/wps <delete|remove> <name>");
             p.sendMessage("Examples:\n");
@@ -268,7 +331,7 @@ public class CommandHandler {
             p.sendMessage("Additional help for /wps list:");
             p.sendMessage("Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
-                    + "A parameter split with a | is an alias,\n"
+                    + "A parameter split with a | is an alias,"
                     + "either one can be used (but only one at a time)");
             p.sendMessage("/wps list [world <world name> |page <#>]");
             p.sendMessage("Examples:\n");
@@ -282,7 +345,7 @@ public class CommandHandler {
             p.sendMessage("Additional help for /wps go:");
             p.sendMessage("Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
-                    + "A parameter split with a | is an alias,\n"
+                    + "A parameter split with a | is an alias,"
                     + "either one can be used (but only one at a time)");
             p.sendMessage("/wps go <name>");
             p.sendMessage("Examples:\n");
@@ -292,7 +355,7 @@ public class CommandHandler {
             p.sendMessage("Additional help for /wps go:");
             p.sendMessage("Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
-                    + "A parameter split with a | is an alias,\n"
+                    + "A parameter split with a | is an alias,"
                     + "either one can be used (but only one at a time)");
             p.sendMessage("/wps return");
             p.sendMessage("Examples:\n");

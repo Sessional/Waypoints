@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -22,6 +23,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class WaypointPlugin extends JavaPlugin {
 
     private Map<String, Waypoint> waypointStorage;
+    private Map<String, Location> returnPoints;
     private FileManager fileManager;
     private ConfigManager configManager;
     private CommandHandler commandHandler;
@@ -32,6 +34,7 @@ public class WaypointPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         waypointStorage = new HashMap<String, Waypoint>();
+        returnPoints = new HashMap<String, Location>();
         configManager = new ConfigManager(this);
         fileManager = new FileManager(this);
         fileManager.loadWaypoints();
@@ -58,14 +61,27 @@ public class WaypointPlugin extends JavaPlugin {
         }
 
         if (p != null) {
+           // p.sendMessage("Command: " + command);
+            //p.sendMessage("Label: " + label);
+            //for (String s : args)
+            //{
+                //p.sendMessage("Arg: " + s);
+            //}
             if (args.length < 1) {
                 commandHandler.handlePlayerHelp(p);
+                return true;
             }
 
             if (args[0].equalsIgnoreCase("help")) {
                 if (args.length >= 2)
                 {
                     commandHandler.handlePlayerHelp(p, args[1]);
+                    return true;
+                }
+                if (args.length == 1)
+                {
+                    commandHandler.handlePlayerHelp(p);
+                    return true;
                 }
             }
 
@@ -129,6 +145,14 @@ public class WaypointPlugin extends JavaPlugin {
     public Map<String, Waypoint> getWaypointStorage() {
         return waypointStorage;
     }
+    
+    /**
+     *
+     * @return the map that stores the Waypoints
+     */
+    public Map<String, Location> getReturnPoints() {
+        return returnPoints;
+    }
 
     /**
      * Shows a severe error message for this plugin using the logger that Bukkit
@@ -138,5 +162,18 @@ public class WaypointPlugin extends JavaPlugin {
      */
     public void executeSevereError(String message) {
         getLogger().log(Level.SEVERE, message);
+    }
+
+    /**
+     * Checks to see if a waypoint with that name exists.
+     * @param waypointName
+     * @return if the Waypoint of that name is in the hashmap
+     */
+    public boolean doesWaypointExist(String waypointName) {
+        return waypointStorage.containsKey(waypointName);
+    }
+
+    public Waypoint getWaypoint(String waypointName) {
+        return waypointStorage.get(waypointName);
     }
 }

@@ -45,6 +45,21 @@ public class Waypoint implements Comparable {
      *
      * @param plugin The parent WaypointPlugin class
      */
+    public Waypoint(WaypointPlugin plugin, String name, Location location)
+    {
+        this.plugin = plugin;
+        this.name = name;
+        this.worldName = location.getWorld().getName();
+        this.xCoord = (float) location.getX();
+        this.yCoord = (float) location.getY();
+        this.zCoord = (float) location.getZ();
+    }
+    
+    /**
+     * Represents a space in a world that can be teleported to.
+     *
+     * @param plugin The parent WaypointPlugin class
+     */
     public Waypoint(WaypointPlugin plugin)
     {
         this.plugin = plugin;
@@ -208,7 +223,7 @@ public class Waypoint implements Comparable {
         String[] waypointData = elements[1].split("@");
         String[] coordinates = waypointData[1].split(",");
         setName(elements[0]);
-        setWorld(waypointData[1]);
+        setWorld(waypointData[0]);
         try {
             setX(Float.parseFloat(coordinates[0]));
             setY(Float.parseFloat(coordinates[1]));

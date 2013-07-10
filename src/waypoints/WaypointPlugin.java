@@ -36,6 +36,7 @@ public class WaypointPlugin extends JavaPlugin {
         waypointStorage = new HashMap<String, Waypoint>();
         returnPoints = new HashMap<String, Location>();
         configManager = new ConfigManager(this);
+        configManager.handleConfigGeneration();
         fileManager = new FileManager(this);
         fileManager.loadWaypoints();
         commandHandler = new CommandHandler(this);
@@ -61,12 +62,6 @@ public class WaypointPlugin extends JavaPlugin {
         }
 
         if (p != null) {
-           // p.sendMessage("Command: " + command);
-            //p.sendMessage("Label: " + label);
-            //for (String s : args)
-            //{
-                //p.sendMessage("Arg: " + s);
-            //}
             if (args.length < 1) {
                 commandHandler.handlePlayerHelp(p);
                 return true;
@@ -91,6 +86,10 @@ public class WaypointPlugin extends JavaPlugin {
             System.arraycopy(args, 1, additionalArgs, 0, args.length - 1);
 
             return getCommandHandler().handlePlayerCommand(p, wpsCommand, additionalArgs);
+        }
+        if (p == null)
+        {
+            
         }
 
         return false;

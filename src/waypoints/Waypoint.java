@@ -1,16 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package waypoints;
 
 import org.bukkit.Location;
 import org.bukkit.World;
 
-/**
- *
- * @author AKRUSE
- */
 public class Waypoint implements Comparable {
 
     private String name;

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package waypoints;
 
 import java.util.ArrayList;
@@ -16,10 +12,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-/**
- *
- * @author AKRUSE
- */
 public class WaypointPlugin extends JavaPlugin {
 
     private Map<String, Waypoint> waypointStorage;
@@ -64,19 +56,16 @@ public class WaypointPlugin extends JavaPlugin {
         if (p != null) {
             if (args.length < 1) {
                 commandHandler.handlePlayerHelp(p);
-                return true;
             }
 
             if (args[0].equalsIgnoreCase("help")) {
                 if (args.length >= 2)
                 {
                     commandHandler.handlePlayerHelp(p, args[1]);
-                    return true;
                 }
                 if (args.length == 1)
                 {
                     commandHandler.handlePlayerHelp(p);
-                    return true;
                 }
             }
 
@@ -85,14 +74,34 @@ public class WaypointPlugin extends JavaPlugin {
             String[] additionalArgs = new String[args.length - 1];
             System.arraycopy(args, 1, additionalArgs, 0, args.length - 1);
 
-            return getCommandHandler().handlePlayerCommand(p, wpsCommand, additionalArgs);
+            getCommandHandler().handlePlayerCommand(p, wpsCommand, additionalArgs);
         }
         if (p == null)
         {
-            
-        }
+            if (args.length < 1) {
+                commandHandler.handleConsoleHelp();
+            }
 
-        return false;
+            if (args[0].equalsIgnoreCase("help")) {
+                if (args.length >= 2)
+                {
+                    commandHandler.handleConsoleHelp(args[1]);
+                }
+                if (args.length == 1)
+                {
+                    commandHandler.handleConsoleHelp();
+                }
+            }
+
+            String wpsCommand = args[0];
+
+            String[] additionalArgs = new String[args.length - 1];
+            System.arraycopy(args, 1, additionalArgs, 0, args.length - 1);
+
+            getCommandHandler().handleConsoleCommand(wpsCommand, additionalArgs);
+        }
+        
+        return true;
     }
 
     /**

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package waypoints;
 
 import java.io.BufferedInputStream;
@@ -14,10 +10,6 @@ import java.io.FileWriter;
 import java.io.ObjectInputStream;
 import java.util.List;
 
-/**
- *
- * @author AKRUSE
- */
 public class FileManager {
     
     private WaypointPlugin plugin;

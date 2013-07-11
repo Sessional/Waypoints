@@ -92,6 +92,7 @@ public class CommandHandler {
         if (!plugin.doesWaypointExist(waypointName)) {
             plugin.getWaypointStorage().put(waypointName, new Waypoint(plugin, waypointName, p.getLocation()));
             p.sendMessage("Created waypoint " + waypointName);
+            plugin.getFileManager().saveWpsFile();
         } else {
             p.sendMessage("" + waypointName + " seems to already exist!");
         }
@@ -112,6 +113,7 @@ public class CommandHandler {
         if (!plugin.doesWaypointExist(waypointName)) {
             plugin.getWaypointStorage().put(waypointName, new Waypoint(plugin, waypointName, worldName, x, y, z));
             p.sendMessage("Created waypoint " + waypointName);
+            plugin.getFileManager().saveWpsFile();
         } else {
             p.sendMessage("" + waypointName + " seems to already exist!");
         }
@@ -131,6 +133,7 @@ public class CommandHandler {
         if (!plugin.doesWaypointExist(waypointName)) {
             plugin.getWaypointStorage().put(waypointName, new Waypoint(plugin, waypointName, worldName, x, y, z));
             System.out.println("Created waypoint " + waypointName);
+            plugin.getFileManager().saveWpsFile();
         } else {
             System.out.println("" + waypointName + " seems to already exist!");
         }
@@ -147,6 +150,7 @@ public class CommandHandler {
         if (plugin.doesWaypointExist(waypointName)) {
             plugin.getWaypointStorage().remove(waypointName);
             p.sendMessage("Deleted " + waypointName + "!");
+            plugin.getFileManager().saveWpsFile();
         } else {
             p.sendMessage("That waypoint doesn't seem to exist!");
         }
@@ -161,6 +165,7 @@ public class CommandHandler {
         if (plugin.doesWaypointExist(waypointName)) {
             plugin.getWaypointStorage().remove(waypointName);
             System.out.println("Deleted " + waypointName + "!");
+            plugin.getFileManager().saveWpsFile();
         } else {
             System.out.println("That waypoint doesn't seem to exist!");
         }
@@ -288,6 +293,22 @@ public class CommandHandler {
                 handlePlayerHelp(p, "go");
             }
         }
+        if (wpsCommand.equalsIgnoreCase("save")) {
+            //p.sendMessage("/wps go <name>");
+            if (permissionsEnabled && !p.hasPermission("waypoints.save")) {
+                p.sendMessage("You do not have the required permissions to run that command.\n"
+                        + "Required permissions node is any of the following:"
+                        + "\n\twaypoints.save");
+                return;
+            }
+            if (additionalArgs.length == 0) {
+                plugin.getFileManager().saveWpsFile();
+                p.sendMessage("Waypoints saved successfully!");
+            } else {
+                p.sendMessage("This command was formatted incorrectly.");
+                handlePlayerHelp(p, "save");
+            }
+        }
     }
 
     /**
@@ -343,6 +364,15 @@ public class CommandHandler {
                 handleConsoleHelp("list");
             }
         }
+        if (wpsCommand.equalsIgnoreCase("save")) {
+            if (additionalArgs.length == 0) {
+                plugin.getFileManager().saveWpsFile();
+                System.out.println("Waypoints saved successfully!");
+            } else {
+                System.out.println("This command was formatted incorrectly.");
+                handleConsoleHelp("save");
+            }
+        }
     }
 
     /**
@@ -361,7 +391,8 @@ public class CommandHandler {
         message += "/wps remove\n";
         message += "/wps list\n";
         message += "/wps go\n";
-        message += "/wps return";
+        message += "/wps return\n";
+        message += "/wps save";
         p.sendMessage(message);
     }
 
@@ -393,7 +424,7 @@ public class CommandHandler {
                     + "A parameter split with a | is an alias,"
                     + "either one can be used (but only one at a time)");
             p.sendMessage("/wps <delete|remove> <name>");
-            p.sendMessage("Examples:\n");
+            p.sendMessage("Examples:");
             p.sendMessage("/wps delete home\n\tDeletes the waypoint called home.");
             p.sendMessage("/wps remove home\n\tDeletes the waypoint called home.");
         }
@@ -404,7 +435,7 @@ public class CommandHandler {
                     + "A parameter split with a | is an alias,"
                     + "either one can be used (but only one at a time)");
             p.sendMessage("/wps list [world <world name> |page <#>]");
-            p.sendMessage("Examples:\n");
+            p.sendMessage("Examples:");
             p.sendMessage("/wps list\n\tLists all waypoints that exist.");
             p.sendMessage("/wps list world homeworld\n\tLists all waypoints"
                     + "that exist on the world homeworld.");
@@ -418,19 +449,29 @@ public class CommandHandler {
                     + "A parameter split with a | is an alias,"
                     + "either one can be used (but only one at a time)");
             p.sendMessage("/wps go <name>");
-            p.sendMessage("Examples:\n");
+            p.sendMessage("Examples:");
             p.sendMessage("/wps go home\n\tTeleports you to the home waypoint.");
         }
         if (suboption.equalsIgnoreCase("return")) {
-            p.sendMessage("Additional help for /wps go:");
+            p.sendMessage("Additional help for /wps return:");
             p.sendMessage("Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
                     + "A parameter split with a | is an alias,"
                     + "either one can be used (but only one at a time)");
             p.sendMessage("/wps return");
-            p.sendMessage("Examples:\n");
+            p.sendMessage("Examples:");
             p.sendMessage("/wps return\n\tReturns you to the location you were"
                     + " at before issuing the last /wps go command.");
+        }
+        if (suboption.equalsIgnoreCase("save")) {
+            p.sendMessage("Additional help for /wps save:");
+            p.sendMessage("Parameters in <> are required.\n"
+                    + "Parameters in [] are optional.\n"
+                    + "A parameter split with a | is an alias,"
+                    + "either one can be used (but only one at a time)");
+            p.sendMessage("/wps save");
+            p.sendMessage("Examples:");
+            p.sendMessage("/wps save\n\tSaves the waypoints to the save file.");
         }
     }
 
@@ -447,6 +488,7 @@ public class CommandHandler {
         message += "/wps delete\n";
         message += "/wps remove\n";
         message += "/wps list\n";
+        message += "/wps save";
         System.out.println(message);
     }
 
@@ -494,6 +536,16 @@ public class CommandHandler {
                     + "that exist on the world homeworld.");
             System.out.println("/wps list page 2\n\tLists waypoints in a page format"
                     + " starting on page two.");
+        }
+        if (suboption.equalsIgnoreCase("save")) {
+            System.out.println("Additional help for /wps save:");
+            System.out.println("Parameters in <> are required.\n"
+                    + "Parameters in [] are optional.\n"
+                    + "A parameter split with a | is an alias,"
+                    + "either one can be used (but only one at a time)");
+            System.out.println("/wps save");
+            System.out.println("Examples:");
+            System.out.println("/wps save\n\tSaves the waypoints to the save file.");
         }
     }
 }

@@ -110,6 +110,8 @@ public class FileManager {
                 wp.fromSaveData(line);
                 plugin.getWaypointStorage().put(wp.getName(), wp);
             }
+            fr.close();
+            br.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

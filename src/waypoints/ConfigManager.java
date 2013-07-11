@@ -9,7 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.configuration.InvalidConfigurationException;
 
-class ConfigManager {
+public class ConfigManager {
 
     private WaypointPlugin plugin;
     

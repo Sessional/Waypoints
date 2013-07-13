@@ -178,10 +178,10 @@ public class WaypointPlugin extends JavaPlugin {
      * @return if the Waypoint of that name is in the hashmap
      */
     public boolean doesWaypointExist(String waypointName) {
-        return waypointStorage.containsKey(waypointName);
+        return waypointStorage.containsKey(waypointName.toLowerCase());
     }
 
     public Waypoint getWaypoint(String waypointName) {
-        return waypointStorage.get(waypointName);
+        return waypointStorage.get(waypointName.toLowerCase());
     }
 }

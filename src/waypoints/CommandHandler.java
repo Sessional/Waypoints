@@ -69,16 +69,43 @@ public class CommandHandler {
      * @param pageNumber
      */
     public void doListPage(Player p, int pageNumber) {
+        int numPages = (int)Math.ceil((double)plugin.getSortedWaypoints().size() / (double)10);
+        if (pageNumber <= 0 || numPages < pageNumber)
+        {
+            p.sendMessage("There is not enough Waypoints to fill that many pages.");
+            return;
+        }
+        int startIndex = 10 * (pageNumber - 1);
+        int endIndex = startIndex + 9;
+        Waypoint[] wps = (Waypoint[]) plugin.getSortedWaypoints().toArray();
+        p.sendMessage("Page " + pageNumber + " of " + numPages);
+        for (int i = startIndex; i <= endIndex; i++)
+        {
+            p.sendMessage(wps[i].getName());
+        }
     }
 
     /**
      * List Waypoints organized in number form. Permissions are not handled in
      * this function!
      *
-     * @param p
      * @param pageNumber
      */
     public void doListPage(int pageNumber) {
+        int numPages = (int)Math.ceil((double)plugin.getSortedWaypoints().size() / (double)10);
+        if (pageNumber <= 0 || numPages < pageNumber)
+        {
+            System.out.println("There is not enough Waypoints to fill that many pages.");
+            return;
+        }
+        int startIndex = 10 * (pageNumber - 1);
+        int endIndex = startIndex + 9;
+        Waypoint[] wps = (Waypoint[]) plugin.getSortedWaypoints().toArray();
+        System.out.println("Page " + pageNumber + " of " + numPages);
+        for (int i = startIndex; i <= endIndex; i++)
+        {
+            System.out.println(wps[i].getName());
+        }
     }
 
     /**
@@ -90,7 +117,7 @@ public class CommandHandler {
      */
     public void doCreateLocal(Player p, String waypointName) {
         if (!plugin.doesWaypointExist(waypointName)) {
-            plugin.getWaypointStorage().put(waypointName, new Waypoint(plugin, waypointName, p.getLocation()));
+            plugin.getWaypointStorage().put(waypointName.toLowerCase(), new Waypoint(plugin, waypointName, p.getLocation()));
             p.sendMessage("Created waypoint " + waypointName);
             plugin.getFileManager().saveWpsFile();
         } else {
@@ -111,7 +138,7 @@ public class CommandHandler {
      */
     public void doCreateRemote(Player p, String waypointName, String worldName, float x, float y, float z) {
         if (!plugin.doesWaypointExist(waypointName)) {
-            plugin.getWaypointStorage().put(waypointName, new Waypoint(plugin, waypointName, worldName, x, y, z));
+            plugin.getWaypointStorage().put(waypointName.toLowerCase(), new Waypoint(plugin, waypointName, worldName, x, y, z));
             p.sendMessage("Created waypoint " + waypointName);
             plugin.getFileManager().saveWpsFile();
         } else {
@@ -131,7 +158,7 @@ public class CommandHandler {
      */
     public void doCreateRemote(String waypointName, String worldName, float x, float y, float z) {
         if (!plugin.doesWaypointExist(waypointName)) {
-            plugin.getWaypointStorage().put(waypointName, new Waypoint(plugin, waypointName, worldName, x, y, z));
+            plugin.getWaypointStorage().put(waypointName.toLowerCase(), new Waypoint(plugin, waypointName, worldName, x, y, z));
             System.out.println("Created waypoint " + waypointName);
             plugin.getFileManager().saveWpsFile();
         } else {
@@ -148,7 +175,7 @@ public class CommandHandler {
      */
     public void doDelete(Player p, String waypointName) {
         if (plugin.doesWaypointExist(waypointName)) {
-            plugin.getWaypointStorage().remove(waypointName);
+            plugin.getWaypointStorage().remove(waypointName.toLowerCase());
             p.sendMessage("Deleted " + waypointName + "!");
             plugin.getFileManager().saveWpsFile();
         } else {
@@ -163,7 +190,7 @@ public class CommandHandler {
      */
     public void doDelete(String waypointName) {
         if (plugin.doesWaypointExist(waypointName)) {
-            plugin.getWaypointStorage().remove(waypointName);
+            plugin.getWaypointStorage().remove(waypointName.toLowerCase());
             System.out.println("Deleted " + waypointName + "!");
             plugin.getFileManager().saveWpsFile();
         } else {

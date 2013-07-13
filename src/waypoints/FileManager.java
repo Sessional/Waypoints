@@ -63,7 +63,7 @@ public class FileManager {
                     (List<com.github.sessional.waypoints.Waypoint>) oIn.readObject();
             oIn.close();
             for (com.github.sessional.waypoints.Waypoint w : waypointData) {
-                plugin.getWaypointStorage().put(w.getName(), new Waypoint(plugin, w.getName(),
+                plugin.getWaypointStorage().put(w.getName().toLowerCase(), new Waypoint(plugin, w.getName(),
                         w.getWorld(), (float) w.getX(), (float) w.getY(), (float) w.getZ()));
             }
         } catch (Exception ex) {
@@ -108,7 +108,7 @@ public class FileManager {
                     continue;
                 Waypoint wp = new Waypoint(plugin);
                 wp.fromSaveData(line);
-                plugin.getWaypointStorage().put(wp.getName(), wp);
+                plugin.getWaypointStorage().put(wp.getName().toLowerCase(), wp);
             }
             fr.close();
             br.close();

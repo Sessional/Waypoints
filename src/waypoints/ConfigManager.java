@@ -31,6 +31,11 @@ public class ConfigManager {
         return plugin.getConfig().getBoolean("EnableDynmap");
     }
 
+    public boolean costingEnabled()
+    {
+        return plugin.getConfig().getBoolean("EnableCosting");
+    }
+    
     void handleConfigGeneration() {
         if (configFile.exists())
         {

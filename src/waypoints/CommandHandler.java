@@ -3,12 +3,14 @@ package waypoints;
 import java.util.Collection;
 import org.bukkit.entity.Player;
 
-public class CommandHandler {
+public class CommandHandler
+{
 
     WaypointPlugin plugin;
     private boolean permissionsEnabled;
 
-    public CommandHandler(WaypointPlugin plugin) {
+    public CommandHandler(WaypointPlugin plugin)
+    {
         this.plugin = plugin;
         permissionsEnabled = plugin.getConfigManager().permissionsEnabled();
     }
@@ -20,12 +22,44 @@ public class CommandHandler {
      * @param p
      * @param waypointName
      */
-    public void doGo(Player p, String waypointName) {
-        if (plugin.doesWaypointExist(waypointName)) {
+    public void doGo(Player p, String waypointName)
+    {
+        if (plugin.doesWaypointExist(waypointName))
+        {
+            if (plugin.getConfigManager().costingEnabled())
+            {
+                if (p.getLevel() < plugin.getWaypoint(waypointName).getCost())
+                {
+                    p.sendMessage("You don't have enough experience to cover that cost.");
+                    return;
+                }
+                p.setLevel(p.getLevel() - plugin.getWaypoint(waypointName).getCost());
+            }
             p.sendMessage("Welcome to " + waypointName + "!");
             plugin.getReturnPoints().put(p.getName(), p.getLocation());
             p.teleport(plugin.getWaypoint(waypointName).getLocation());
-        } else {
+        } else
+        {
+            p.sendMessage("That waypoint doesn't seem to exist!");
+        }
+    }
+
+    /**
+     * Teleport a player to a Waypoint. Permissions are not handled in this
+     * function!
+     *
+     * @param p
+     * @param waypointName
+     */
+    public void doGoNoCost(Player p, String waypointName)
+    {
+        if (plugin.doesWaypointExist(waypointName))
+        {
+            p.sendMessage("Welcome to " + waypointName + "!");
+            plugin.getReturnPoints().put(p.getName(), p.getLocation());
+            p.teleport(plugin.getWaypoint(waypointName).getLocation());
+        } else
+        {
             p.sendMessage("That waypoint doesn't seem to exist!");
         }
     }
@@ -37,11 +71,20 @@ public class CommandHandler {
      * @param p
      * @param worldName
      */
-    public void doListWorld(Player p, String worldName) {
+    public void doListWorld(Player p, String worldName)
+    {
         Collection<Waypoint> c = plugin.getSortedWaypoints();
-        for (Waypoint w : c) {
-            if (w.getWorldName().equalsIgnoreCase(worldName)) {
-                p.sendMessage(w.getName());
+        for (Waypoint w : c)
+        {
+            if (w.getWorldName().equalsIgnoreCase(worldName))
+            {
+                if (plugin.getConfigManager().costingEnabled())
+                {
+                    p.sendMessage(w.getName() + " (Cost: " + w.getCost() + ")");
+                } else
+                {
+                    p.sendMessage(w.getName());
+                }
             }
         }
     }
@@ -52,11 +95,20 @@ public class CommandHandler {
      *
      * @param worldName
      */
-    public void doListWorld(String worldName) {
+    public void doListWorld(String worldName)
+    {
         Collection<Waypoint> c = plugin.getSortedWaypoints();
-        for (Waypoint w : c) {
-            if (w.getWorldName().equalsIgnoreCase(worldName)) {
-                System.out.println(w.getName());
+        for (Waypoint w : c)
+        {
+            if (w.getWorldName().equalsIgnoreCase(worldName))
+            {
+                if (plugin.getConfigManager().costingEnabled())
+                {
+                    System.out.println(w.getName() + " (Cost: " + w.getCost() + ")");
+                } else
+                {
+                    System.out.println(w.getName());
+                }
             }
         }
     }
@@ -68,8 +120,9 @@ public class CommandHandler {
      * @param p
      * @param pageNumber
      */
-    public void doListPage(Player p, int pageNumber) {
-        int numPages = (int)Math.ceil((double)plugin.getSortedWaypoints().size() / (double)10);
+    public void doListPage(Player p, int pageNumber)
+    {
+        int numPages = (int) Math.ceil((double) plugin.getSortedWaypoints().size() / (double) 10);
         if (pageNumber <= 0 || numPages < pageNumber)
         {
             p.sendMessage("There is not enough Waypoints to fill that many pages.");
@@ -91,8 +144,9 @@ public class CommandHandler {
      *
      * @param pageNumber
      */
-    public void doListPage(int pageNumber) {
-        int numPages = (int)Math.ceil((double)plugin.getSortedWaypoints().size() / (double)10);
+    public void doListPage(int pageNumber)
+    {
+        int numPages = (int) Math.ceil((double) plugin.getSortedWaypoints().size() / (double) 10);
         if (pageNumber <= 0 || numPages < pageNumber)
         {
             System.out.println("There is not enough Waypoints to fill that many pages.");
@@ -115,12 +169,35 @@ public class CommandHandler {
      * @param p
      * @param waypointName
      */
-    public void doCreateLocal(Player p, String waypointName) {
-        if (!plugin.doesWaypointExist(waypointName)) {
+    public void doCreateLocal(Player p, String waypointName)
+    {
+        if (!plugin.doesWaypointExist(waypointName))
+        {
             plugin.getWaypointStorage().put(waypointName.toLowerCase(), new Waypoint(plugin, waypointName, p.getLocation()));
             p.sendMessage("Created waypoint " + waypointName);
             plugin.getFileManager().saveWpsFile();
-        } else {
+        } else
+        {
+            p.sendMessage("" + waypointName + " seems to already exist!");
+        }
+    }
+
+    /**
+     * Create a Waypoint at the current location of the player. Permissions are
+     * not handled in this function!
+     *
+     * @param p
+     * @param waypointName
+     */
+    public void doCreateLocal(Player p, String waypointName, int cost)
+    {
+        if (!plugin.doesWaypointExist(waypointName))
+        {
+            plugin.getWaypointStorage().put(waypointName.toLowerCase(), new Waypoint(plugin, waypointName, p.getLocation(), cost));
+            p.sendMessage("Created waypoint " + waypointName);
+            plugin.getFileManager().saveWpsFile();
+        } else
+        {
             p.sendMessage("" + waypointName + " seems to already exist!");
         }
     }
@@ -136,12 +213,39 @@ public class CommandHandler {
      * @param y
      * @param z
      */
-    public void doCreateRemote(Player p, String waypointName, String worldName, float x, float y, float z) {
-        if (!plugin.doesWaypointExist(waypointName)) {
+    public void doCreateRemote(Player p, String waypointName, String worldName, float x, float y, float z)
+    {
+        if (!plugin.doesWaypointExist(waypointName))
+        {
             plugin.getWaypointStorage().put(waypointName.toLowerCase(), new Waypoint(plugin, waypointName, worldName, x, y, z));
             p.sendMessage("Created waypoint " + waypointName);
             plugin.getFileManager().saveWpsFile();
-        } else {
+        } else
+        {
+            p.sendMessage("" + waypointName + " seems to already exist!");
+        }
+    }
+
+    /**
+     * Create a Waypoint at a remote destination using the given coordinates.
+     * Permissions are not handled in this function!
+     *
+     * @param p
+     * @param waypointName
+     * @param worldName
+     * @param x
+     * @param y
+     * @param z
+     */
+    public void doCreateRemote(Player p, String waypointName, String worldName, float x, float y, float z, int cost)
+    {
+        if (!plugin.doesWaypointExist(waypointName))
+        {
+            plugin.getWaypointStorage().put(waypointName.toLowerCase(), new Waypoint(plugin, waypointName, worldName, x, y, z, cost));
+            p.sendMessage("Created waypoint " + waypointName);
+            plugin.getFileManager().saveWpsFile();
+        } else
+        {
             p.sendMessage("" + waypointName + " seems to already exist!");
         }
     }
@@ -156,12 +260,15 @@ public class CommandHandler {
      * @param y
      * @param z
      */
-    public void doCreateRemote(String waypointName, String worldName, float x, float y, float z) {
-        if (!plugin.doesWaypointExist(waypointName)) {
-            plugin.getWaypointStorage().put(waypointName.toLowerCase(), new Waypoint(plugin, waypointName, worldName, x, y, z));
+    public void doCreateRemote(String waypointName, String worldName, float x, float y, float z)
+    {
+        if (!plugin.doesWaypointExist(waypointName))
+        {
+            plugin.getWaypointStorage().put(waypointName.toLowerCase(), new Waypoint(plugin, waypointName, worldName, x, y, z, 0));
             System.out.println("Created waypoint " + waypointName);
             plugin.getFileManager().saveWpsFile();
-        } else {
+        } else
+        {
             System.out.println("" + waypointName + " seems to already exist!");
         }
     }
@@ -173,12 +280,15 @@ public class CommandHandler {
      * @param p
      * @param waypointName
      */
-    public void doDelete(Player p, String waypointName) {
-        if (plugin.doesWaypointExist(waypointName)) {
+    public void doDelete(Player p, String waypointName)
+    {
+        if (plugin.doesWaypointExist(waypointName))
+        {
             plugin.getWaypointStorage().remove(waypointName.toLowerCase());
             p.sendMessage("Deleted " + waypointName + "!");
             plugin.getFileManager().saveWpsFile();
-        } else {
+        } else
+        {
             p.sendMessage("That waypoint doesn't seem to exist!");
         }
     }
@@ -188,12 +298,15 @@ public class CommandHandler {
      *
      * @param waypointName
      */
-    public void doDelete(String waypointName) {
-        if (plugin.doesWaypointExist(waypointName)) {
+    public void doDelete(String waypointName)
+    {
+        if (plugin.doesWaypointExist(waypointName))
+        {
             plugin.getWaypointStorage().remove(waypointName.toLowerCase());
             System.out.println("Deleted " + waypointName + "!");
             plugin.getFileManager().saveWpsFile();
-        } else {
+        } else
+        {
             System.out.println("That waypoint doesn't seem to exist!");
         }
     }
@@ -204,11 +317,14 @@ public class CommandHandler {
      *
      * @param p
      */
-    public void doReturn(Player p) {
-        if (plugin.getReturnPoints().containsKey(p.getName())) {
+    public void doReturn(Player p)
+    {
+        if (plugin.getReturnPoints().containsKey(p.getName()))
+        {
             p.teleport(plugin.getReturnPoints().get(p.getName()));
             plugin.getReturnPoints().remove(p.getName());
-        } else {
+        } else
+        {
             p.sendMessage("You have no return point to return to!");
         }
     }
@@ -221,117 +337,212 @@ public class CommandHandler {
      * @param wpsCommand the waypoint command used, eg. add or delete
      * @param additionalArgs the remaining arguments of the command issued
      */
-    public void handlePlayerCommand(Player p, String wpsCommand, String[] additionalArgs) {
+    public void handlePlayerCommand(Player p, String wpsCommand, String[] additionalArgs)
+    {
 
-        if (wpsCommand.equalsIgnoreCase("add") || wpsCommand.equalsIgnoreCase("create")) {
+        if (wpsCommand.equalsIgnoreCase("set") || wpsCommand.equalsIgnoreCase("update"))
+        {
+            if (permissionsEnabled && !p.hasPermission("waypoints.set") && !p.hasPermission("waypoints.update"))
+            {
+                p.sendMessage("You do not have the required permissions to run that command.\n"
+                        + "Required permissions nodes are either of the following:\n"
+                        + "\twaypoints.set\n"
+                        + "\twaypoints.update");
+                return;
+            }
+            else if (additionalArgs.length == 2)
+            {
+                String wpName = additionalArgs[0];
+                int cost = Integer.parseInt(additionalArgs[1]);
+                
+                doUpdateWaypoint(p, wpName, cost);
+            }
+            else if (additionalArgs.length == 5)
+            {
+                String wpName = additionalArgs[0];
+                String worldName = additionalArgs[1];
+                
+                float xCoord = Float.parseFloat(additionalArgs[2]);
+                float yCoord = Float.parseFloat(additionalArgs[3]);
+                float zCoord = Float.parseFloat(additionalArgs[4]);
+                
+                doUpdateWaypoint(p, wpName, worldName, xCoord, yCoord, zCoord);
+            }
+            else if (additionalArgs.length == 6)
+            {
+                String wpName = additionalArgs[0];
+                String worldName = additionalArgs[1];
+                
+                float xCoord = Float.parseFloat(additionalArgs[2]);
+                float yCoord = Float.parseFloat(additionalArgs[3]);
+                float zCoord = Float.parseFloat(additionalArgs[4]);
+                
+                int cost = Integer.parseInt(additionalArgs[1]);
+                
+                doUpdateWaypoint(p, wpName, worldName, xCoord, yCoord, zCoord, cost);
+            }
+            else
+            {
+                p.sendMessage("This command was formatted incorrectly.");
+                handlePlayerHelp(p, "update");
+            }
+        }
+        if (wpsCommand.equalsIgnoreCase("add") || wpsCommand.equalsIgnoreCase("create"))
+        {
             //p.sendMessage("/wps <add|create> <name> [world] [x] [y] [z]");
 
-            if (permissionsEnabled && !p.hasPermission("waypoints.add") && !p.hasPermission("waypoints.create")) {
+            if (permissionsEnabled && !p.hasPermission("waypoints.add") && !p.hasPermission("waypoints.create"))
+            {
                 p.sendMessage("You do not have the required permissions to run that command.\n"
                         + "Required permissions node is any of the following:"
                         + "\n\twaypoints.add"
                         + "\n\twaypoints.create");
                 return;
-            } else if (additionalArgs.length == 5) {
+            } else if (additionalArgs.length == 6)
+            {
+                String name = additionalArgs[0];
+                String world = additionalArgs[1];
+                float xCoord = Float.parseFloat(additionalArgs[2]);
+                float yCoord = Float.parseFloat(additionalArgs[3]);
+                float zCoord = Float.parseFloat(additionalArgs[4]);
+                int cost = Integer.parseInt(additionalArgs[5]);
+                doCreateRemote(p, name, world, xCoord, yCoord, zCoord, cost);
+            } else if (additionalArgs.length == 5)
+            {
                 String name = additionalArgs[0];
                 String world = additionalArgs[1];
                 float xCoord = Float.parseFloat(additionalArgs[2]);
                 float yCoord = Float.parseFloat(additionalArgs[3]);
                 float zCoord = Float.parseFloat(additionalArgs[4]);
                 doCreateRemote(p, name, world, xCoord, yCoord, zCoord);
-            } else if (additionalArgs.length == 1) {
+            } else if (additionalArgs.length == 2)
+            {
+                String name = additionalArgs[0];
+                int cost = Integer.parseInt(additionalArgs[1]);
+                doCreateLocal(p, name, cost);
+            } else if (additionalArgs.length == 1)
+            {
                 String name = additionalArgs[0];
                 doCreateLocal(p, name);
-            } else {
+            } else
+            {
                 p.sendMessage("This command was formatted incorrectly.");
                 handlePlayerHelp(p, "add");
             }
         }
-        if (wpsCommand.equalsIgnoreCase("delete") || wpsCommand.equalsIgnoreCase("remove")) {
+        if (wpsCommand.equalsIgnoreCase("delete") || wpsCommand.equalsIgnoreCase("remove"))
+        {
             //p.sendMessage("/wps <delete|remove> <name>");
-            if (permissionsEnabled && !p.hasPermission("waypoints.delete") && !p.hasPermission("waypoints.remove")) {
+            if (permissionsEnabled && !p.hasPermission("waypoints.delete") && !p.hasPermission("waypoints.remove"))
+            {
                 p.sendMessage("You do not have the required permissions to run that command."
-                    + "Required permissions node is any of the following:"
+                        + "Required permissions node is any of the following:"
                         + "\n\twaypoints.delete"
                         + "\n\twaypoints.remove");
                 return;
-            } else if (additionalArgs.length == 1) {
+            } else if (additionalArgs.length == 1)
+            {
                 String name = additionalArgs[0];
                 doDelete(p, name);
-            } else {
+            } else
+            {
                 handlePlayerHelp(p, "remove");
             }
         }
-        if (wpsCommand.equalsIgnoreCase("list")) {
+        if (wpsCommand.equalsIgnoreCase("list"))
+        {
             //p.sendMessage("/wps list [world <world name> |page <#>]");
-            if (permissionsEnabled && !p.hasPermission("waypoints.list")) {
+            if (permissionsEnabled && !p.hasPermission("waypoints.list"))
+            {
                 p.sendMessage("You do not have the required permissions to run that command.\n"
                         + "Required permissions node is any of the following:"
                         + "\n\twaypoints.list");
                 return;
-            }
-            else if (additionalArgs.length == 2) {
-                if (additionalArgs[0].equalsIgnoreCase("world")) {
+            } else if (additionalArgs.length == 2)
+            {
+                if (additionalArgs[0].equalsIgnoreCase("world"))
+                {
                     String worldName = additionalArgs[1];
                     this.doListWorld(p, worldName);
-                } else if (additionalArgs[0].equalsIgnoreCase("page")) {
+                } else if (additionalArgs[0].equalsIgnoreCase("page"))
+                {
                     int pageNumber = Integer.parseInt(additionalArgs[1]);
                     this.doListPage(p, pageNumber);
                 }
-            }
-            else if (additionalArgs.length == 0) {
+            } else if (additionalArgs.length == 0)
+            {
                 Collection<Waypoint> c = plugin.getSortedWaypoints();
-                for (Waypoint w : c) {
-                    p.sendMessage(w.getName());
+                for (Waypoint w : c)
+                {
+                    if (plugin.getConfigManager().costingEnabled())
+                    {
+                        p.sendMessage(w.getName() + " (Cost: " + w.getCost() + ")");
+                    } else
+                    {
+                        p.sendMessage(w.getName());
+                    }
                 }
-            } else {
+            } else
+            {
                 p.sendMessage("This command was formatted incorrectly.");
                 handlePlayerHelp(p, "list");
             }
         }
-        if (wpsCommand.equalsIgnoreCase("return")) {
+        if (wpsCommand.equalsIgnoreCase("return"))
+        {
             //p.sendMessage("/wps return");
-            if (permissionsEnabled && !p.hasPermission("waypoints.return")) {
+            if (permissionsEnabled && !p.hasPermission("waypoints.return"))
+            {
                 p.sendMessage("You do not have the required permissions to run that command.\n"
                         + "Required permissions node is any of the following:"
                         + "\n\twaypoints.return");
                 return;
             }
-            if (additionalArgs.length == 0) {
+            if (additionalArgs.length == 0)
+            {
                 doReturn(p);
-            } else {
+            } else
+            {
                 p.sendMessage("This command was formatted incorrectly.");
                 handlePlayerHelp(p, "return");
             }
         }
-        if (wpsCommand.equalsIgnoreCase("go")) {
+        if (wpsCommand.equalsIgnoreCase("go"))
+        {
             //p.sendMessage("/wps go <name>");
-            if (permissionsEnabled && !p.hasPermission("waypoints.go")) {
+            if (permissionsEnabled && !p.hasPermission("waypoints.go"))
+            {
                 p.sendMessage("You do not have the required permissions to run that command.\n"
                         + "Required permissions node is any of the following:"
                         + "\n\twaypoints.go");
                 return;
             }
-            if (additionalArgs.length == 1) {
+            if (additionalArgs.length == 1)
+            {
                 String destination = additionalArgs[0];
                 doGo(p, destination);
-            } else {
+            } else
+            {
                 p.sendMessage("This command was formatted incorrectly.");
                 handlePlayerHelp(p, "go");
             }
         }
-        if (wpsCommand.equalsIgnoreCase("save")) {
+        if (wpsCommand.equalsIgnoreCase("save"))
+        {
             //p.sendMessage("/wps go <name>");
-            if (permissionsEnabled && !p.hasPermission("waypoints.save")) {
+            if (permissionsEnabled && !p.hasPermission("waypoints.save"))
+            {
                 p.sendMessage("You do not have the required permissions to run that command.\n"
                         + "Required permissions node is any of the following:"
                         + "\n\twaypoints.save");
                 return;
             }
-            if (additionalArgs.length == 0) {
+            if (additionalArgs.length == 0)
+            {
                 plugin.getFileManager().saveWpsFile();
                 p.sendMessage("Waypoints saved successfully!");
-            } else {
+            } else
+            {
                 p.sendMessage("This command was formatted incorrectly.");
                 handlePlayerHelp(p, "save");
             }
@@ -344,58 +555,81 @@ public class CommandHandler {
      * @param wpsCommand the waypoint command used, eg. add or delete
      * @param additionalArgs the remaining arguments of the command issued
      */
-    public void handleConsoleCommand(String wpsCommand, String[] additionalArgs) {
+    public void handleConsoleCommand(String wpsCommand, String[] additionalArgs)
+    {
 
-        if (wpsCommand.equalsIgnoreCase("add") || wpsCommand.equalsIgnoreCase("create")) {
+        if (wpsCommand.equalsIgnoreCase("add") || wpsCommand.equalsIgnoreCase("create"))
+        {
             //p.sendMessage("/wps <add|create> <name> [world] [x] [y] [z]");
-            if (additionalArgs.length == 5) {
+            if (additionalArgs.length == 5)
+            {
                 String name = additionalArgs[0];
                 String world = additionalArgs[1];
                 float xCoord = Float.parseFloat(additionalArgs[2]);
                 float yCoord = Float.parseFloat(additionalArgs[3]);
                 float zCoord = Float.parseFloat(additionalArgs[4]);
                 doCreateRemote(name, world, xCoord, yCoord, zCoord);
-            } else {
+            } else
+            {
                 System.out.println("This command was formatted incorrectly.");
                 handleConsoleHelp("add");
             }
         }
-        if (wpsCommand.equalsIgnoreCase("delete") || wpsCommand.equalsIgnoreCase("remove")) {
+        if (wpsCommand.equalsIgnoreCase("delete") || wpsCommand.equalsIgnoreCase("remove"))
+        {
             //p.sendMessage("/wps <delete|remove> <name>");
-            if (additionalArgs.length == 1) {
+            if (additionalArgs.length == 1)
+            {
                 String name = additionalArgs[0];
                 doDelete(name);
-            } else {
+            } else
+            {
                 System.out.println("This command was formatted incorrectly.");
                 handleConsoleHelp("remove");
             }
         }
-        if (wpsCommand.equalsIgnoreCase("list")) {
+        if (wpsCommand.equalsIgnoreCase("list"))
+        {
             //p.sendMessage("/wps list [world <world name> |page <#>]");
-            if (additionalArgs.length == 2) {
-                if (additionalArgs[0].equalsIgnoreCase("world")) {
+            if (additionalArgs.length == 2)
+            {
+                if (additionalArgs[0].equalsIgnoreCase("world"))
+                {
                     String worldName = additionalArgs[1];
                     doListWorld(worldName);
-                } else if (additionalArgs[0].equalsIgnoreCase("page")) {
+                } else if (additionalArgs[0].equalsIgnoreCase("page"))
+                {
                     int pageNumber = Integer.parseInt(additionalArgs[1]);
                     doListPage(pageNumber);
                 }
             }
-            if (additionalArgs.length == 0) {
+            if (additionalArgs.length == 0)
+            {
                 Collection<Waypoint> c = plugin.getSortedWaypoints();
-                for (Waypoint w : c) {
-                    System.out.println(w.getName());
+                for (Waypoint w : c)
+                {
+                    if (plugin.getConfigManager().costingEnabled())
+                    {
+                        System.out.println(w.getName() + " (Cost: " + w.getCost() + ")");
+                    } else
+                    {
+                        System.out.println(w.getName());
+                    }
                 }
-            } else {
+            } else
+            {
                 System.out.println("This command was formatted incorrectly.");
                 handleConsoleHelp("list");
             }
         }
-        if (wpsCommand.equalsIgnoreCase("save")) {
-            if (additionalArgs.length == 0) {
+        if (wpsCommand.equalsIgnoreCase("save"))
+        {
+            if (additionalArgs.length == 0)
+            {
                 plugin.getFileManager().saveWpsFile();
                 System.out.println("Waypoints saved successfully!");
-            } else {
+            } else
+            {
                 System.out.println("This command was formatted incorrectly.");
                 handleConsoleHelp("save");
             }
@@ -407,7 +641,8 @@ public class CommandHandler {
      *
      * @param p The player to display the message to
      */
-    public void handlePlayerHelp(Player p) {
+    public void handlePlayerHelp(Player p)
+    {
         String message = "Waypoints additional help:\n";
         message += "type /wps help <command> for more help.\n";
         message += "wps can be substituted with waypoints\n";
@@ -419,7 +654,9 @@ public class CommandHandler {
         message += "/wps list\n";
         message += "/wps go\n";
         message += "/wps return\n";
-        message += "/wps save";
+        message += "/wps save\n";
+        message += "/wps update\n";
+        message += "/wps set";
         p.sendMessage(message);
     }
 
@@ -429,8 +666,10 @@ public class CommandHandler {
      * @param p the player the message should go to
      * @param suboption the sub command of Waypoint that was used
      */
-    public void handlePlayerHelp(Player p, String suboption) {
-        if (suboption.equalsIgnoreCase("add") || suboption.equalsIgnoreCase("create")) {
+    public void handlePlayerHelp(Player p, String suboption)
+    {
+        if (suboption.equalsIgnoreCase("add") || suboption.equalsIgnoreCase("create"))
+        {
             p.sendMessage("Additional help for /wps add:\n"
                     + "Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
@@ -444,7 +683,8 @@ public class CommandHandler {
                     + "waypoint called home at x:0 y:0 z:0.");
         }
         if (suboption.equalsIgnoreCase("delete")
-                || suboption.equalsIgnoreCase("remove")) {
+                || suboption.equalsIgnoreCase("remove"))
+        {
             p.sendMessage("Additional help for /wps delete:");
             p.sendMessage("Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
@@ -455,7 +695,8 @@ public class CommandHandler {
             p.sendMessage("/wps delete home\n\tDeletes the waypoint called home.");
             p.sendMessage("/wps remove home\n\tDeletes the waypoint called home.");
         }
-        if (suboption.equalsIgnoreCase("list")) {
+        if (suboption.equalsIgnoreCase("list"))
+        {
             p.sendMessage("Additional help for /wps list:");
             p.sendMessage("Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
@@ -469,7 +710,8 @@ public class CommandHandler {
             p.sendMessage("/wps list page 2\n\tLists waypoints in a page format"
                     + " starting on page two.");
         }
-        if (suboption.equalsIgnoreCase("go")) {
+        if (suboption.equalsIgnoreCase("go"))
+        {
             p.sendMessage("Additional help for /wps go:");
             p.sendMessage("Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
@@ -479,7 +721,8 @@ public class CommandHandler {
             p.sendMessage("Examples:");
             p.sendMessage("/wps go home\n\tTeleports you to the home waypoint.");
         }
-        if (suboption.equalsIgnoreCase("return")) {
+        if (suboption.equalsIgnoreCase("return"))
+        {
             p.sendMessage("Additional help for /wps return:");
             p.sendMessage("Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
@@ -490,7 +733,8 @@ public class CommandHandler {
             p.sendMessage("/wps return\n\tReturns you to the location you were"
                     + " at before issuing the last /wps go command.");
         }
-        if (suboption.equalsIgnoreCase("save")) {
+        if (suboption.equalsIgnoreCase("save"))
+        {
             p.sendMessage("Additional help for /wps save:");
             p.sendMessage("Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
@@ -500,12 +744,26 @@ public class CommandHandler {
             p.sendMessage("Examples:");
             p.sendMessage("/wps save\n\tSaves the waypoints to the save file.");
         }
+        if (suboption.equalsIgnoreCase("update") || suboption.equalsIgnoreCase("set"))
+        {
+            p.sendMessage("Additional help for /wps save:");
+            p.sendMessage("Parameters in <> are required.\n"
+                    + "Parameters in [] are optional.\n"
+                    + "A parameter split with a | is an alias,"
+                    + "either one can be used (but only one at a time)");
+            p.sendMessage("/wps set <waypoint name> <cost>");
+            p.sendMessage("/wps set <waypoint name> <world name> <x> <y> <z>");
+            p.sendMessage("/wps set <waypoint name> <world name> <x> <y> <z> <cost>");
+            p.sendMessage("Examples:");
+            p.sendMessage("/wps set Home world 0 72 0 0\n\tSets home to teleport you to 0,72,0 for free.");
+        }
     }
 
     /**
      * Displays basic help message inside the server console
      */
-    public void handleConsoleHelp() {
+    public void handleConsoleHelp()
+    {
         String message = "Waypoints additional help:\n";
         message += "type /wps help <command> for more help.\n";
         message += "wps can be substituted with waypoints\n";
@@ -524,8 +782,10 @@ public class CommandHandler {
      *
      * @param suboption The sub command to display help for
      */
-    public void handleConsoleHelp(String suboption) {
-        if (suboption.equalsIgnoreCase("add") || suboption.equalsIgnoreCase("create")) {
+    public void handleConsoleHelp(String suboption)
+    {
+        if (suboption.equalsIgnoreCase("add") || suboption.equalsIgnoreCase("create"))
+        {
             System.out.println("Additional help for /wps add:");
             System.out.println("Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
@@ -539,7 +799,8 @@ public class CommandHandler {
                     + "waypoint called home at x:0 y:0 z:0.");
         }
         if (suboption.equalsIgnoreCase("delete")
-                || suboption.equalsIgnoreCase("remove")) {
+                || suboption.equalsIgnoreCase("remove"))
+        {
             System.out.println("Additional help for /wps delete:");
             System.out.println("Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
@@ -550,7 +811,8 @@ public class CommandHandler {
             System.out.println("/wps delete home\n\tDeletes the waypoint called home.");
             System.out.println("/wps remove home\n\tDeletes the waypoint called home.");
         }
-        if (suboption.equalsIgnoreCase("list")) {
+        if (suboption.equalsIgnoreCase("list"))
+        {
             System.out.println("Additional help for /wps list:");
             System.out.println("Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
@@ -564,7 +826,8 @@ public class CommandHandler {
             System.out.println("/wps list page 2\n\tLists waypoints in a page format"
                     + " starting on page two.");
         }
-        if (suboption.equalsIgnoreCase("save")) {
+        if (suboption.equalsIgnoreCase("save"))
+        {
             System.out.println("Additional help for /wps save:");
             System.out.println("Parameters in <> are required.\n"
                     + "Parameters in [] are optional.\n"
@@ -574,5 +837,36 @@ public class CommandHandler {
             System.out.println("Examples:");
             System.out.println("/wps save\n\tSaves the waypoints to the save file.");
         }
+    }
+
+    public void doUpdateWaypoint(Player p, String wpName, int cost)
+    {
+        p.sendMessage("Waypoint " + wpName + " will be updated to cost " + cost + ".");
+        Waypoint wp = plugin.getWaypoint(wpName);
+        wp.setCost(cost);
+        plugin.getFileManager().saveWpsFile();
+    }
+    
+    public void doUpdateWaypoint(Player p, String wpName, String worldName, float x, float y, float z)
+    {
+        p.sendMessage("Waypoint " + wpName + " will be moved to position " + x + "," + y + "," + z + ".");
+        Waypoint wp = plugin.getWaypoint(wpName);
+        wp.setWorld(worldName);
+        wp.setX(x);
+        wp.setY(y);
+        wp.setZ(z);
+        plugin.getFileManager().saveWpsFile();
+    }
+    
+    public void doUpdateWaypoint(Player p, String wpName, String worldName, float x, float y, float z, int cost)
+    {
+        p.sendMessage("Waypoint " + wpName + " will be moved to position " + x + "," + y + "," + z + " and cost " + cost + ".");
+        Waypoint wp = plugin.getWaypoint(wpName);
+        wp.setWorld(worldName);
+        wp.setX(x);
+        wp.setY(y);
+        wp.setZ(z);
+        wp.setCost(cost);
+        plugin.getFileManager().saveWpsFile();
     }
 }

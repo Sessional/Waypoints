@@ -64,7 +64,7 @@ public class FileManager {
             oIn.close();
             for (com.github.sessional.waypoints.Waypoint w : waypointData) {
                 plugin.getWaypointStorage().put(w.getName().toLowerCase(), new Waypoint(plugin, w.getName(),
-                        w.getWorld(), (float) w.getX(), (float) w.getY(), (float) w.getZ()));
+                        w.getWorld(), (float) w.getX(), (float) w.getY(), (float) w.getZ(), 0));
             }
         } catch (Exception ex) {
             plugin.executeSevereError("Failure to load old waypoint data\nError code: 2");

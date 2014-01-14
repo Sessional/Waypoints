@@ -2,3 +2,4 @@
 ---
 EnableDynmap: false
 EnablePermissions: false
+EnableCosting: true

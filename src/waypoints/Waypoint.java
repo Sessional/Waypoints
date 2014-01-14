@@ -10,6 +10,7 @@ public class Waypoint implements Comparable {
     private float xCoord;
     private float yCoord;
     private float zCoord;
+    private int cost;
     private Location loc;
     private WaypointPlugin plugin;
 
@@ -30,12 +31,36 @@ public class Waypoint implements Comparable {
         this.xCoord = xCoord;
         this.yCoord = yCoord;
         this.zCoord = zCoord;
+        this.cost = 0;
+    }
+    
+    /**
+     * Represents a space in a world that can be teleported to.
+     *
+     * @param plugin the parent WaypointPlugin class
+     * @param name the name the Waypoint should use
+     * @param worldName the world the Waypoint resides in
+     * @param xCoord the x coordinate the waypoint is at
+     * @param yCoord the y coordinate the waypoint is at
+     * @param zCoord the z coordinate the waypoint is at
+     * @param cost the cost to teleport to this waypoint
+     */
+    public Waypoint(WaypointPlugin plugin, String name, String worldName, float xCoord, float yCoord, float zCoord, int cost) {
+        this.plugin = plugin;
+        this.name = name;
+        this.worldName = worldName;
+        this.xCoord = xCoord;
+        this.yCoord = yCoord;
+        this.zCoord = zCoord;
+        this.cost = cost;
     }
     
     /**
      * Represents a space in a world that can be teleported to.
      *
      * @param plugin The parent WaypointPlugin class
+     * @param name
+     * @param location
      */
     public Waypoint(WaypointPlugin plugin, String name, Location location)
     {
@@ -45,6 +70,18 @@ public class Waypoint implements Comparable {
         this.xCoord = (float) location.getX();
         this.yCoord = (float) location.getY();
         this.zCoord = (float) location.getZ();
+        this.cost = 0;
+    }
+    
+    public Waypoint(WaypointPlugin plugin, String name, Location location, int cost)
+    {
+        this.plugin = plugin;
+        this.name = name;
+        this.worldName = location.getWorld().getName();
+        this.xCoord = (float) location.getX();
+        this.yCoord = (float) location.getY();
+        this.zCoord = (float) location.getZ();
+        this.cost = cost;
     }
     
     /**
@@ -119,6 +156,15 @@ public class Waypoint implements Comparable {
     }
 
     /**
+     * Returns the cost for this waypoint.
+     * @return 
+     */
+    public int getCost()
+    {
+        return cost;
+    }
+    
+    /**
      * Helper method to allow the updating of the Waypoint.
      * Sets the location to be regenerated upon next access.
      *
@@ -184,6 +230,15 @@ public class Waypoint implements Comparable {
     public void setName(String name) {
         this.name = name;
     }
+    
+    /**
+     * Sets the cost to teleport to this waypoint
+     * @param cost 
+     */
+    public void setCost(int cost)
+    {
+        this.cost = cost;
+    }
 
     /**
      * Formats a string that can be written to a file to save this Waypoint.
@@ -201,6 +256,8 @@ public class Waypoint implements Comparable {
         saveForm.append(getY());
         saveForm.append(",");
         saveForm.append(getZ());
+        saveForm.append(":");
+        saveForm.append(getCost());
         return saveForm.toString();
     }
 
@@ -223,6 +280,16 @@ public class Waypoint implements Comparable {
         } catch (NumberFormatException e) {
             plugin.executeSevereError("Failure to load waypoint coordinates "
                     + "for Waypoint " + getName() + "\nError code: 1");
+        }
+        if (elements.length == 3)
+        {
+            try
+            {
+                setCost(Integer.parseInt(elements[2]));
+            } catch (NumberFormatException e)
+            {
+                plugin.executeSevereError("Failure to load cost for waypoint " + getName() +"\nError code: 3");
+            }
         }
     }
 

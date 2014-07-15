@@ -4,4 +4,6 @@
 /nbproject/*
 build.xml
 manifest.mf
-
+/.idea/*
+/out/*
+*.iml

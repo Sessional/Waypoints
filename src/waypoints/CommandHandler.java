@@ -171,7 +171,11 @@ public class CommandHandler
      */
     public void doCreateLocal(Player p, String waypointName)
     {
-        if (!plugin.doesWaypointExist(waypointName))
+        if (waypointName.contains(":"))
+        {
+            p.sendMessage("You can not create a waypoint with : in the name.");
+        }
+        else if (!plugin.doesWaypointExist(waypointName))
         {
             plugin.getWaypointStorage().put(waypointName.toLowerCase(), new Waypoint(plugin, waypointName, p.getLocation()));
             p.sendMessage("Created waypoint " + waypointName);
@@ -191,7 +195,11 @@ public class CommandHandler
      */
     public void doCreateLocal(Player p, String waypointName, int cost)
     {
-        if (!plugin.doesWaypointExist(waypointName))
+        if (waypointName.contains(":"))
+        {
+            p.sendMessage("You can not create a waypoint with : in the name.");
+        }
+        else if (!plugin.doesWaypointExist(waypointName))
         {
             plugin.getWaypointStorage().put(waypointName.toLowerCase(), new Waypoint(plugin, waypointName, p.getLocation(), cost));
             p.sendMessage("Created waypoint " + waypointName);
@@ -215,7 +223,11 @@ public class CommandHandler
      */
     public void doCreateRemote(Player p, String waypointName, String worldName, float x, float y, float z)
     {
-        if (!plugin.doesWaypointExist(waypointName))
+        if (waypointName.contains(":"))
+        {
+            p.sendMessage("You can not create a waypoint with : in the name.");
+        }
+        else if (!plugin.doesWaypointExist(waypointName))
         {
             plugin.getWaypointStorage().put(waypointName.toLowerCase(), new Waypoint(plugin, waypointName, worldName, x, y, z));
             p.sendMessage("Created waypoint " + waypointName);
@@ -239,7 +251,11 @@ public class CommandHandler
      */
     public void doCreateRemote(Player p, String waypointName, String worldName, float x, float y, float z, int cost)
     {
-        if (!plugin.doesWaypointExist(waypointName))
+        if (waypointName.contains(":"))
+        {
+            p.sendMessage("You can not create a waypoint with : in the name.");
+        }
+        else if (!plugin.doesWaypointExist(waypointName))
         {
             plugin.getWaypointStorage().put(waypointName.toLowerCase(), new Waypoint(plugin, waypointName, worldName, x, y, z, cost));
             p.sendMessage("Created waypoint " + waypointName);
@@ -262,7 +278,11 @@ public class CommandHandler
      */
     public void doCreateRemote(String waypointName, String worldName, float x, float y, float z)
     {
-        if (!plugin.doesWaypointExist(waypointName))
+        if (waypointName.contains(":"))
+        {
+            System.out.println("You can not create a waypoint with : in the name.");
+        }
+        else if (!plugin.doesWaypointExist(waypointName))
         {
             plugin.getWaypointStorage().put(waypointName.toLowerCase(), new Waypoint(plugin, waypointName, worldName, x, y, z, 0));
             System.out.println("Created waypoint " + waypointName);
